@@ -21,7 +21,7 @@ Realtime Online Whiteboard using TCP Socket and C# WinForms.
 - Nguyễn Anh Duy - 087206007232 - duyna7232-alt
 - Nguyễn Quốc Triệu - 052206009523 - Tr-06
 - Trần Hoàng Thiên Chương - 072206005407 - chuongtht5407-eng
-- Lê Trần Vũ Bảo
+- Lê Trần Vũ Bảo - 077206008670 - Vubao2611
 
 ## Project Type
 Desktop Application
