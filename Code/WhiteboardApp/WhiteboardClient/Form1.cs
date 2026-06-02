@@ -1,4 +1,4 @@
-namespace WhiteboardClient
+﻿namespace WhiteboardClient
 {
     public partial class Form1 : Form
     {
