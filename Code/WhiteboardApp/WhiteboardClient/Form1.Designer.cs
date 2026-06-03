@@ -2,15 +2,8 @@
 {
     partial class Form1
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,255 +15,495 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.roomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pnlTools = new System.Windows.Forms.Panel();
-            this.pnlCanvas = new System.Windows.Forms.Panel();
-            this.flpUsers = new System.Windows.Forms.FlowLayoutPanel();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.btnPen = new System.Windows.Forms.Button();
-            this.btnEraser = new System.Windows.Forms.Button();
+            this.lblConnectionStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblCoordinates = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblTool = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblColor = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblBrushSize = new System.Windows.Forms.ToolStripStatusLabel();
+            this.pnlTopToolbar = new System.Windows.Forms.Panel();
+            this.btnLogout = new System.Windows.Forms.Button();
+            this.pnlUser = new System.Windows.Forms.Panel();
+            this.lblUserInfo = new System.Windows.Forms.Label();
+            this.lblUserAvatar = new System.Windows.Forms.Label();
+            this.lblRoomName = new System.Windows.Forms.Label();
+            this.panelDivider = new System.Windows.Forms.Panel();
+            this.btnJoinRoom = new System.Windows.Forms.Button();
+            this.btnNewRoom = new System.Windows.Forms.Button();
+            this.pnlMain = new System.Windows.Forms.Panel();
+            this.pnlCanvasContainer = new System.Windows.Forms.Panel();
+            this.pnlCanvas = new System.Windows.Forms.Panel();
+            this.pnlRight = new System.Windows.Forms.Panel();
+            this.flpOnlineUsers = new System.Windows.Forms.FlowLayoutPanel();
+            this.pnlLeftTools = new System.Windows.Forms.Panel();
+            this.grpActions = new System.Windows.Forms.GroupBox();
+            this.btnSaveImage = new System.Windows.Forms.Button();
+            this.btnClearAll = new System.Windows.Forms.Button();
+            this.grpProperties = new System.Windows.Forms.GroupBox();
+            this.lblBrushSizeText = new System.Windows.Forms.Label();
             this.trackBrushSize = new System.Windows.Forms.TrackBar();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.newRoomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.joinRoomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.createRoomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnColor2 = new System.Windows.Forms.Button();
+            this.btnColor1 = new System.Windows.Forms.Button();
+            this.lblColorLabel = new System.Windows.Forms.Label();
+            this.grpDrawingTools = new System.Windows.Forms.GroupBox();
+            this.btnEraser = new System.Windows.Forms.Button();
+            this.btnPen = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
-            this.pnlTools.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            this.pnlTopToolbar.SuspendLayout();
+            this.pnlUser.SuspendLayout();
+            this.pnlMain.SuspendLayout();
+            this.pnlCanvasContainer.SuspendLayout();
+            this.pnlRight.SuspendLayout();
+            this.pnlLeftTools.SuspendLayout();
+            this.grpActions.SuspendLayout();
+            this.grpProperties.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBrushSize)).BeginInit();
+            this.grpDrawingTools.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
+            this.menuStrip1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
+            this.editToolStripMenuItem,
             this.roomToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(982, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(1264, 28);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // fileToolStripMenuItem
             // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.newRoomToolStripMenuItem,
-            this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // editToolStripMenuItem
+            // 
+            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(49, 24);
+            this.editToolStripMenuItem.Text = "Edit";
+            // 
             // roomToolStripMenuItem
             // 
-            this.roomToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.joinRoomToolStripMenuItem,
-            this.createRoomToolStripMenuItem});
             this.roomToolStripMenuItem.Name = "roomToolStripMenuItem";
             this.roomToolStripMenuItem.Size = new System.Drawing.Size(63, 24);
             this.roomToolStripMenuItem.Text = "Room";
             // 
             // helpToolStripMenuItem
             // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(55, 24);
             this.helpToolStripMenuItem.Text = "Help";
             // 
-            // pnlTools
+            // statusStrip1
             // 
-            this.pnlTools.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.pnlTools.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlTools.Controls.Add(this.label4);
-            this.pnlTools.Controls.Add(this.trackBrushSize);
-            this.pnlTools.Controls.Add(this.btnEraser);
-            this.pnlTools.Controls.Add(this.btnPen);
-            this.pnlTools.Location = new System.Drawing.Point(12, 43);
-            this.pnlTools.Name = "pnlTools";
-            this.pnlTools.Size = new System.Drawing.Size(120, 395);
-            this.pnlTools.TabIndex = 1;
-            this.pnlTools.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
+            this.statusStrip1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblConnectionStatus,
+            this.lblCoordinates,
+            this.lblTool,
+            this.lblColor,
+            this.lblBrushSize});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 735);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1264, 26);
+            this.statusStrip1.TabIndex = 1;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // lblConnectionStatus
+            // 
+            this.lblConnectionStatus.ForeColor = System.Drawing.Color.DimGray;
+            this.lblConnectionStatus.Image = ((System.Drawing.Image)(resources.GetObject("lblConnectionStatus.Image")));
+            this.lblConnectionStatus.Name = "lblConnectionStatus";
+            this.lblConnectionStatus.Size = new System.Drawing.Size(256, 20);
+            this.lblConnectionStatus.Text = "📶 Connected: 192.168.1.100:8080";
+            // 
+            // lblCoordinates
+            // 
+            this.lblCoordinates.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
+            this.lblCoordinates.Name = "lblCoordinates";
+            this.lblCoordinates.Size = new System.Drawing.Size(87, 21);
+            this.lblCoordinates.Text = "X: 181, Y: 14";
+            // 
+            // lblTool
+            // 
+            this.lblTool.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
+            this.lblTool.Name = "lblTool";
+            this.lblTool.Size = new System.Drawing.Size(68, 21);
+            this.lblTool.Text = "Tool: Pen";
+            // 
+            // lblColor
+            // 
+            this.lblColor.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
+            this.lblColor.Name = "lblColor";
+            this.lblColor.Size = new System.Drawing.Size(107, 21);
+            this.lblColor.Text = "Color: #FF0000";
+            // 
+            // lblBrushSize
+            // 
+            this.lblBrushSize.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
+            this.lblBrushSize.Name = "lblBrushSize";
+            this.lblBrushSize.Size = new System.Drawing.Size(67, 21);
+            this.lblBrushSize.Text = "Size: 3px";
+            // 
+            // pnlTopToolbar
+            // 
+            this.pnlTopToolbar.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.pnlTopToolbar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlTopToolbar.Controls.Add(this.btnLogout);
+            this.pnlTopToolbar.Controls.Add(this.pnlUser);
+            this.pnlTopToolbar.Controls.Add(this.lblRoomName);
+            this.pnlTopToolbar.Controls.Add(this.panelDivider);
+            this.pnlTopToolbar.Controls.Add(this.btnJoinRoom);
+            this.pnlTopToolbar.Controls.Add(this.btnNewRoom);
+            this.pnlTopToolbar.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlTopToolbar.Location = new System.Drawing.Point(0, 28);
+            this.pnlTopToolbar.Name = "pnlTopToolbar";
+            this.pnlTopToolbar.Padding = new System.Windows.Forms.Padding(10, 8, 10, 8);
+            this.pnlTopToolbar.Size = new System.Drawing.Size(1264, 45);
+            this.pnlTopToolbar.TabIndex = 2;
+            // 
+            // btnLogout
+            // 
+            this.btnLogout.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnLogout.Location = new System.Drawing.Point(1037, 8);
+            this.btnLogout.Name = "btnLogout";
+            this.btnLogout.Size = new System.Drawing.Size(75, 27);
+            this.btnLogout.TabIndex = 6;
+            this.btnLogout.Text = "Logout";
+            this.btnLogout.UseVisualStyleBackColor = true;
+            // 
+            // pnlUser
+            // 
+            this.pnlUser.Controls.Add(this.lblUserInfo);
+            this.pnlUser.Controls.Add(this.lblUserAvatar);
+            this.pnlUser.Dock = System.Windows.Forms.DockStyle.Right;
+            this.pnlUser.Location = new System.Drawing.Point(1112, 8);
+            this.pnlUser.Name = "pnlUser";
+            this.pnlUser.Size = new System.Drawing.Size(140, 27);
+            this.pnlUser.TabIndex = 5;
+            // 
+            // lblUserInfo
+            // 
+            this.lblUserInfo.AutoSize = true;
+            this.lblUserInfo.Location = new System.Drawing.Point(34, 6);
+            this.lblUserInfo.Name = "lblUserInfo";
+            this.lblUserInfo.Size = new System.Drawing.Size(110, 20);
+            this.lblUserInfo.TabIndex = 1;
+            this.lblUserInfo.Text = "Nguyễn Văn An";
+            // 
+            // lblUserAvatar
+            // 
+            this.lblUserAvatar.BackColor = System.Drawing.Color.Crimson;
+            this.lblUserAvatar.ForeColor = System.Drawing.Color.White;
+            this.lblUserAvatar.Location = new System.Drawing.Point(3, 2);
+            this.lblUserAvatar.Name = "lblUserAvatar";
+            this.lblUserAvatar.Size = new System.Drawing.Size(23, 23);
+            this.lblUserAvatar.TabIndex = 0;
+            this.lblUserAvatar.Text = "N";
+            this.lblUserAvatar.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblRoomName
+            // 
+            this.lblRoomName.AutoSize = true;
+            this.lblRoomName.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lblRoomName.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblRoomName.ForeColor = System.Drawing.Color.DimGray;
+            this.lblRoomName.Location = new System.Drawing.Point(180, 8);
+            this.lblRoomName.Name = "lblRoomName";
+            this.lblRoomName.Padding = new System.Windows.Forms.Padding(10, 5, 0, 0);
+            this.lblRoomName.Size = new System.Drawing.Size(180, 25);
+            this.lblRoomName.TabIndex = 4;
+            this.lblRoomName.Text = "Room: Phòng Vẽ Chính";
+            // 
+            // panelDivider
+            // 
+            this.panelDivider.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panelDivider.Location = new System.Drawing.Point(170, 8);
+            this.panelDivider.Name = "panelDivider";
+            this.panelDivider.Size = new System.Drawing.Size(10, 27);
+            this.panelDivider.TabIndex = 3;
+            // 
+            // btnJoinRoom
+            // 
+            this.btnJoinRoom.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnJoinRoom.Location = new System.Drawing.Point(90, 8);
+            this.btnJoinRoom.Name = "btnJoinRoom";
+            this.btnJoinRoom.Size = new System.Drawing.Size(80, 27);
+            this.btnJoinRoom.TabIndex = 1;
+            this.btnJoinRoom.Text = "Join Room";
+            this.btnJoinRoom.UseVisualStyleBackColor = true;
+            // 
+            // btnNewRoom
+            // 
+            this.btnNewRoom.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnNewRoom.Location = new System.Drawing.Point(10, 8);
+            this.btnNewRoom.Name = "btnNewRoom";
+            this.btnNewRoom.Size = new System.Drawing.Size(80, 27);
+            this.btnNewRoom.TabIndex = 0;
+            this.btnNewRoom.Text = "New Room";
+            this.btnNewRoom.UseVisualStyleBackColor = true;
+            // 
+            // pnlMain
+            // 
+            this.pnlMain.Controls.Add(this.pnlCanvasContainer);
+            this.pnlMain.Controls.Add(this.pnlRight);
+            this.pnlMain.Controls.Add(this.pnlLeftTools);
+            this.pnlMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlMain.Location = new System.Drawing.Point(0, 73);
+            this.pnlMain.Name = "pnlMain";
+            this.pnlMain.Padding = new System.Windows.Forms.Padding(10);
+            this.pnlMain.Size = new System.Drawing.Size(1264, 662);
+            this.pnlMain.TabIndex = 3;
+            // 
+            // pnlCanvasContainer
+            // 
+            this.pnlCanvasContainer.Controls.Add(this.pnlCanvas);
+            this.pnlCanvasContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlCanvasContainer.Location = new System.Drawing.Point(150, 10);
+            this.pnlCanvasContainer.Name = "pnlCanvasContainer";
+            this.pnlCanvasContainer.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.pnlCanvasContainer.Size = new System.Drawing.Size(894, 642);
+            this.pnlCanvasContainer.TabIndex = 2;
             // 
             // pnlCanvas
             // 
             this.pnlCanvas.BackColor = System.Drawing.Color.White;
             this.pnlCanvas.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlCanvas.Location = new System.Drawing.Point(150, 43);
+            this.pnlCanvas.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlCanvas.Location = new System.Drawing.Point(10, 0);
             this.pnlCanvas.Name = "pnlCanvas";
-            this.pnlCanvas.Size = new System.Drawing.Size(491, 373);
-            this.pnlCanvas.TabIndex = 2;
+            this.pnlCanvas.Size = new System.Drawing.Size(874, 642);
+            this.pnlCanvas.TabIndex = 0;
             // 
-            // flpUsers
+            // pnlRight
             // 
-            this.flpUsers.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.flpUsers.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.flpUsers.Location = new System.Drawing.Point(663, 43);
-            this.flpUsers.Name = "flpUsers";
-            this.flpUsers.Size = new System.Drawing.Size(163, 395);
-            this.flpUsers.TabIndex = 3;
+            this.pnlRight.Controls.Add(this.flpOnlineUsers);
+            this.pnlRight.Dock = System.Windows.Forms.DockStyle.Right;
+            this.pnlRight.Location = new System.Drawing.Point(1044, 10);
+            this.pnlRight.Name = "pnlRight";
+            this.pnlRight.Size = new System.Drawing.Size(210, 642);
+            this.pnlRight.TabIndex = 1;
             // 
-            // statusStrip1
+            // flpOnlineUsers
             // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 527);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(982, 26);
-            this.statusStrip1.TabIndex = 4;
-            this.statusStrip1.Text = "statusStrip1";
+            this.flpOnlineUsers.BackColor = System.Drawing.Color.White;
+            this.flpOnlineUsers.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.flpOnlineUsers.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flpOnlineUsers.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.flpOnlineUsers.Location = new System.Drawing.Point(0, 0);
+            this.flpOnlineUsers.Name = "flpOnlineUsers";
+            this.flpOnlineUsers.Padding = new System.Windows.Forms.Padding(5);
+            this.flpOnlineUsers.Size = new System.Drawing.Size(210, 642);
+            this.flpOnlineUsers.TabIndex = 0;
             // 
-            // btnPen
+            // pnlLeftTools
             // 
-            this.btnPen.BackColor = System.Drawing.Color.LightSteelBlue;
-            this.btnPen.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnPen.Location = new System.Drawing.Point(23, 30);
-            this.btnPen.Name = "btnPen";
-            this.btnPen.Size = new System.Drawing.Size(75, 23);
-            this.btnPen.TabIndex = 0;
-            this.btnPen.Text = "Pen";
-            this.btnPen.UseVisualStyleBackColor = false;
-            this.btnPen.Click += new System.EventHandler(this.btnPen_Click);
+            this.pnlLeftTools.Controls.Add(this.grpActions);
+            this.pnlLeftTools.Controls.Add(this.grpProperties);
+            this.pnlLeftTools.Controls.Add(this.grpDrawingTools);
+            this.pnlLeftTools.Dock = System.Windows.Forms.DockStyle.Left;
+            this.pnlLeftTools.Location = new System.Drawing.Point(10, 10);
+            this.pnlLeftTools.Name = "pnlLeftTools";
+            this.pnlLeftTools.Size = new System.Drawing.Size(140, 642);
+            this.pnlLeftTools.TabIndex = 0;
             // 
-            // btnEraser
+            // grpActions
             // 
-            this.btnEraser.BackColor = System.Drawing.Color.MistyRose;
-            this.btnEraser.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEraser.Location = new System.Drawing.Point(23, 86);
-            this.btnEraser.Name = "btnEraser";
-            this.btnEraser.Size = new System.Drawing.Size(75, 23);
-            this.btnEraser.TabIndex = 1;
-            this.btnEraser.Text = "Eraser";
-            this.btnEraser.UseVisualStyleBackColor = false;
+            this.grpActions.Controls.Add(this.btnSaveImage);
+            this.grpActions.Controls.Add(this.btnClearAll);
+            this.grpActions.Dock = System.Windows.Forms.DockStyle.Top;
+            this.grpActions.ForeColor = System.Drawing.Color.DimGray;
+            this.grpActions.Location = new System.Drawing.Point(0, 255);
+            this.grpActions.Name = "grpActions";
+            this.grpActions.Padding = new System.Windows.Forms.Padding(10);
+            this.grpActions.Size = new System.Drawing.Size(140, 110);
+            this.grpActions.TabIndex = 2;
+            this.grpActions.TabStop = false;
+            this.grpActions.Text = "Actions";
+            // 
+            // btnSaveImage
+            // 
+            this.btnSaveImage.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnSaveImage.ForeColor = System.Drawing.Color.Black;
+            this.btnSaveImage.Location = new System.Drawing.Point(10, 60);
+            this.btnSaveImage.Name = "btnSaveImage";
+            this.btnSaveImage.Size = new System.Drawing.Size(120, 30);
+            this.btnSaveImage.TabIndex = 1;
+            this.btnSaveImage.Text = "📥 Save Image";
+            this.btnSaveImage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnSaveImage.UseVisualStyleBackColor = true;
+            // 
+            // btnClearAll
+            // 
+            this.btnClearAll.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnClearAll.ForeColor = System.Drawing.Color.Black;
+            this.btnClearAll.Location = new System.Drawing.Point(10, 30);
+            this.btnClearAll.Name = "btnClearAll";
+            this.btnClearAll.Size = new System.Drawing.Size(120, 30);
+            this.btnClearAll.TabIndex = 0;
+            this.btnClearAll.Text = "🗑 Clear All";
+            this.btnClearAll.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnClearAll.UseVisualStyleBackColor = true;
+            // 
+            // grpProperties
+            // 
+            this.grpProperties.Controls.Add(this.lblBrushSizeText);
+            this.grpProperties.Controls.Add(this.trackBrushSize);
+            this.grpProperties.Controls.Add(this.btnColor2);
+            this.grpProperties.Controls.Add(this.btnColor1);
+            this.grpProperties.Controls.Add(this.lblColorLabel);
+            this.grpProperties.Dock = System.Windows.Forms.DockStyle.Top;
+            this.grpProperties.ForeColor = System.Drawing.Color.DimGray;
+            this.grpProperties.Location = new System.Drawing.Point(0, 115);
+            this.grpProperties.Name = "grpProperties";
+            this.grpProperties.Padding = new System.Windows.Forms.Padding(10);
+            this.grpProperties.Size = new System.Drawing.Size(140, 140);
+            this.grpProperties.TabIndex = 1;
+            this.grpProperties.TabStop = false;
+            this.grpProperties.Text = "Properties";
+            // 
+            // lblBrushSizeText
+            // 
+            this.lblBrushSizeText.AutoSize = true;
+            this.lblBrushSizeText.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.lblBrushSizeText.ForeColor = System.Drawing.Color.White;
+            this.lblBrushSizeText.Location = new System.Drawing.Point(10, 80);
+            this.lblBrushSizeText.Name = "lblBrushSizeText";
+            this.lblBrushSizeText.Padding = new System.Windows.Forms.Padding(2);
+            this.lblBrushSizeText.Size = new System.Drawing.Size(111, 24);
+            this.lblBrushSizeText.TabIndex = 4;
+            this.lblBrushSizeText.Text = "Brush Size: 3px";
             // 
             // trackBrushSize
             // 
-            this.trackBrushSize.Location = new System.Drawing.Point(11, 167);
+            this.trackBrushSize.AutoSize = false;
+            this.trackBrushSize.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.trackBrushSize.Location = new System.Drawing.Point(10, 105);
             this.trackBrushSize.Maximum = 20;
             this.trackBrushSize.Minimum = 1;
             this.trackBrushSize.Name = "trackBrushSize";
-            this.trackBrushSize.Size = new System.Drawing.Size(104, 56);
-            this.trackBrushSize.TabIndex = 2;
+            this.trackBrushSize.Size = new System.Drawing.Size(120, 25);
+            this.trackBrushSize.TabIndex = 3;
+            this.trackBrushSize.TickStyle = System.Windows.Forms.TickStyle.None;
             this.trackBrushSize.Value = 3;
             // 
-            // label1
+            // btnColor2
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(163)));
-            this.label1.Location = new System.Drawing.Point(50, 30);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(47, 16);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Tools";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.btnColor2.BackColor = System.Drawing.Color.Red;
+            this.btnColor2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnColor2.Location = new System.Drawing.Point(52, 45);
+            this.btnColor2.Name = "btnColor2";
+            this.btnColor2.Size = new System.Drawing.Size(78, 25);
+            this.btnColor2.TabIndex = 2;
+            this.btnColor2.UseVisualStyleBackColor = false;
             // 
-            // label2
+            // btnColor1
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(163)));
-            this.label2.Location = new System.Drawing.Point(318, 30);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(119, 16);
-            this.label2.TabIndex = 6;
-            this.label2.Text = "Drawing Canvas\n";
+            this.btnColor1.BackColor = System.Drawing.Color.Red;
+            this.btnColor1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnColor1.Location = new System.Drawing.Point(10, 45);
+            this.btnColor1.Name = "btnColor1";
+            this.btnColor1.Size = new System.Drawing.Size(35, 25);
+            this.btnColor1.TabIndex = 1;
+            this.btnColor1.UseVisualStyleBackColor = false;
             // 
-            // label3
+            // lblColorLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(163)));
-            this.label3.Location = new System.Drawing.Point(689, 29);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(96, 16);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "Online Users";
+            this.lblColorLabel.AutoSize = true;
+            this.lblColorLabel.ForeColor = System.Drawing.Color.Black;
+            this.lblColorLabel.Location = new System.Drawing.Point(10, 23);
+            this.lblColorLabel.Name = "lblColorLabel";
+            this.lblColorLabel.Size = new System.Drawing.Size(48, 20);
+            this.lblColorLabel.TabIndex = 0;
+            this.lblColorLabel.Text = "Color:";
             // 
-            // label4
+            // grpDrawingTools
             // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(163)));
-            this.label4.Location = new System.Drawing.Point(20, 148);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(80, 16);
-            this.label4.TabIndex = 3;
-            this.label4.Text = "Brush Size";
+            this.grpDrawingTools.Controls.Add(this.btnEraser);
+            this.grpDrawingTools.Controls.Add(this.btnPen);
+            this.grpDrawingTools.Dock = System.Windows.Forms.DockStyle.Top;
+            this.grpDrawingTools.ForeColor = System.Drawing.Color.DimGray;
+            this.grpDrawingTools.Location = new System.Drawing.Point(0, 0);
+            this.grpDrawingTools.Name = "grpDrawingTools";
+            this.grpDrawingTools.Padding = new System.Windows.Forms.Padding(10);
+            this.grpDrawingTools.Size = new System.Drawing.Size(140, 115);
+            this.grpDrawingTools.TabIndex = 0;
+            this.grpDrawingTools.TabStop = false;
+            this.grpDrawingTools.Text = "Drawing Tools";
             // 
-            // toolStripStatusLabel1
+            // btnEraser
             // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(185, 20);
-            this.toolStripStatusLabel1.Text = "Ready - Whiteboard Client";
+            this.btnEraser.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnEraser.ForeColor = System.Drawing.Color.Black;
+            this.btnEraser.Location = new System.Drawing.Point(10, 70);
+            this.btnEraser.Name = "btnEraser";
+            this.btnEraser.Size = new System.Drawing.Size(120, 40);
+            this.btnEraser.TabIndex = 1;
+            this.btnEraser.Text = "⌫ Eraser";
+            this.btnEraser.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnEraser.UseVisualStyleBackColor = true;
             // 
-            // newRoomToolStripMenuItem
+            // btnPen
             // 
-            this.newRoomToolStripMenuItem.Name = "newRoomToolStripMenuItem";
-            this.newRoomToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.newRoomToolStripMenuItem.Text = "New Room";
-            // 
-            // exitToolStripMenuItem
-            // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.exitToolStripMenuItem.Text = "Exit";
-            // 
-            // joinRoomToolStripMenuItem
-            // 
-            this.joinRoomToolStripMenuItem.Name = "joinRoomToolStripMenuItem";
-            this.joinRoomToolStripMenuItem.Size = new System.Drawing.Size(224, 44);
-            this.joinRoomToolStripMenuItem.Text = "Join Room\n";
-            // 
-            // createRoomToolStripMenuItem
-            // 
-            this.createRoomToolStripMenuItem.Name = "createRoomToolStripMenuItem";
-            this.createRoomToolStripMenuItem.Size = new System.Drawing.Size(224, 44);
-            this.createRoomToolStripMenuItem.Text = "Create Room";
-            // 
-            // aboutToolStripMenuItem
-            // 
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.aboutToolStripMenuItem.Text = "About";
+            this.btnPen.BackColor = System.Drawing.Color.White;
+            this.btnPen.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnPen.ForeColor = System.Drawing.Color.Black;
+            this.btnPen.Location = new System.Drawing.Point(10, 30);
+            this.btnPen.Name = "btnPen";
+            this.btnPen.Size = new System.Drawing.Size(120, 40);
+            this.btnPen.TabIndex = 0;
+            this.btnPen.Text = "✎ Pen";
+            this.btnPen.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnPen.UseVisualStyleBackColor = false;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(982, 553);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.ClientSize = new System.Drawing.Size(1264, 761);
+            this.Controls.Add(this.pnlMain);
+            this.Controls.Add(this.pnlTopToolbar);
             this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.flpUsers);
-            this.Controls.Add(this.pnlCanvas);
-            this.Controls.Add(this.pnlTools);
             this.Controls.Add(this.menuStrip1);
+            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Whiteboard Client";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.pnlTools.ResumeLayout(false);
-            this.pnlTools.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.pnlTopToolbar.ResumeLayout(false);
+            this.pnlTopToolbar.PerformLayout();
+            this.pnlUser.ResumeLayout(false);
+            this.pnlUser.PerformLayout();
+            this.pnlMain.ResumeLayout(false);
+            this.pnlCanvasContainer.ResumeLayout(false);
+            this.pnlRight.ResumeLayout(false);
+            this.pnlLeftTools.ResumeLayout(false);
+            this.grpActions.ResumeLayout(false);
+            this.grpProperties.ResumeLayout(false);
+            this.grpProperties.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBrushSize)).EndInit();
+            this.grpDrawingTools.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -280,25 +513,41 @@
 
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem roomToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.Windows.Forms.Panel pnlTools;
-        private System.Windows.Forms.Panel pnlCanvas;
-        private System.Windows.Forms.FlowLayoutPanel flpUsers;
         private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lblConnectionStatus;
+        private System.Windows.Forms.ToolStripStatusLabel lblCoordinates;
+        private System.Windows.Forms.ToolStripStatusLabel lblTool;
+        private System.Windows.Forms.ToolStripStatusLabel lblColor;
+        private System.Windows.Forms.ToolStripStatusLabel lblBrushSize;
+        private System.Windows.Forms.Panel pnlTopToolbar;
+        private System.Windows.Forms.Button btnNewRoom;
+        private System.Windows.Forms.Button btnJoinRoom;
+        private System.Windows.Forms.Panel panelDivider;
+        private System.Windows.Forms.Label lblRoomName;
+        private System.Windows.Forms.Panel pnlUser;
+        private System.Windows.Forms.Label lblUserInfo;
+        private System.Windows.Forms.Label lblUserAvatar;
+        private System.Windows.Forms.Button btnLogout;
+        private System.Windows.Forms.Panel pnlMain;
+        private System.Windows.Forms.Panel pnlLeftTools;
+        private System.Windows.Forms.Panel pnlRight;
+        private System.Windows.Forms.FlowLayoutPanel flpOnlineUsers;
+        private System.Windows.Forms.Panel pnlCanvasContainer;
+        private System.Windows.Forms.Panel pnlCanvas;
+        private System.Windows.Forms.GroupBox grpDrawingTools;
         private System.Windows.Forms.Button btnPen;
         private System.Windows.Forms.Button btnEraser;
+        private System.Windows.Forms.GroupBox grpProperties;
+        private System.Windows.Forms.Label lblColorLabel;
+        private System.Windows.Forms.Button btnColor1;
+        private System.Windows.Forms.Button btnColor2;
         private System.Windows.Forms.TrackBar trackBrushSize;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
-        private System.Windows.Forms.ToolStripMenuItem newRoomToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem joinRoomToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem createRoomToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.Label lblBrushSizeText;
+        private System.Windows.Forms.GroupBox grpActions;
+        private System.Windows.Forms.Button btnClearAll;
+        private System.Windows.Forms.Button btnSaveImage;
     }
 }
-
