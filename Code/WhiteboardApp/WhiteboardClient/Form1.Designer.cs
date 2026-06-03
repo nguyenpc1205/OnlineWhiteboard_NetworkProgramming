@@ -19,8 +19,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.roomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -75,27 +75,27 @@
             this.menuStrip1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem,
             this.editToolStripMenuItem,
+            this.fileToolStripMenuItem,
             this.roomToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1264, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(1551, 28);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
-            // 
-            // fileToolStripMenuItem
-            // 
-            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
-            this.fileToolStripMenuItem.Text = "File";
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(49, 24);
             this.editToolStripMenuItem.Text = "Edit";
+            // 
+            // fileToolStripMenuItem
+            // 
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
+            this.fileToolStripMenuItem.Text = "File";
             // 
             // roomToolStripMenuItem
             // 
@@ -121,7 +121,7 @@
             this.lblBrushSize});
             this.statusStrip1.Location = new System.Drawing.Point(0, 735);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1264, 26);
+            this.statusStrip1.Size = new System.Drawing.Size(1551, 26);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -175,13 +175,13 @@
             this.pnlTopToolbar.Location = new System.Drawing.Point(0, 28);
             this.pnlTopToolbar.Name = "pnlTopToolbar";
             this.pnlTopToolbar.Padding = new System.Windows.Forms.Padding(10, 8, 10, 8);
-            this.pnlTopToolbar.Size = new System.Drawing.Size(1264, 45);
+            this.pnlTopToolbar.Size = new System.Drawing.Size(1551, 45);
             this.pnlTopToolbar.TabIndex = 2;
             // 
             // btnLogout
             // 
             this.btnLogout.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnLogout.Location = new System.Drawing.Point(1037, 8);
+            this.btnLogout.Location = new System.Drawing.Point(1324, 8);
             this.btnLogout.Name = "btnLogout";
             this.btnLogout.Size = new System.Drawing.Size(75, 27);
             this.btnLogout.TabIndex = 6;
@@ -193,7 +193,7 @@
             this.pnlUser.Controls.Add(this.lblUserInfo);
             this.pnlUser.Controls.Add(this.lblUserAvatar);
             this.pnlUser.Dock = System.Windows.Forms.DockStyle.Right;
-            this.pnlUser.Location = new System.Drawing.Point(1112, 8);
+            this.pnlUser.Location = new System.Drawing.Point(1399, 8);
             this.pnlUser.Name = "pnlUser";
             this.pnlUser.Size = new System.Drawing.Size(140, 27);
             this.pnlUser.TabIndex = 5;
@@ -268,7 +268,7 @@
             this.pnlMain.Location = new System.Drawing.Point(0, 73);
             this.pnlMain.Name = "pnlMain";
             this.pnlMain.Padding = new System.Windows.Forms.Padding(10);
-            this.pnlMain.Size = new System.Drawing.Size(1264, 662);
+            this.pnlMain.Size = new System.Drawing.Size(1551, 662);
             this.pnlMain.TabIndex = 3;
             // 
             // pnlCanvasContainer
@@ -278,7 +278,7 @@
             this.pnlCanvasContainer.Location = new System.Drawing.Point(150, 10);
             this.pnlCanvasContainer.Name = "pnlCanvasContainer";
             this.pnlCanvasContainer.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.pnlCanvasContainer.Size = new System.Drawing.Size(894, 642);
+            this.pnlCanvasContainer.Size = new System.Drawing.Size(1181, 642);
             this.pnlCanvasContainer.TabIndex = 2;
             // 
             // pnlCanvas
@@ -288,14 +288,14 @@
             this.pnlCanvas.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlCanvas.Location = new System.Drawing.Point(10, 0);
             this.pnlCanvas.Name = "pnlCanvas";
-            this.pnlCanvas.Size = new System.Drawing.Size(874, 642);
+            this.pnlCanvas.Size = new System.Drawing.Size(1161, 642);
             this.pnlCanvas.TabIndex = 0;
             // 
             // pnlRight
             // 
             this.pnlRight.Controls.Add(this.flpOnlineUsers);
             this.pnlRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.pnlRight.Location = new System.Drawing.Point(1044, 10);
+            this.pnlRight.Location = new System.Drawing.Point(1331, 10);
             this.pnlRight.Name = "pnlRight";
             this.pnlRight.Size = new System.Drawing.Size(210, 642);
             this.pnlRight.TabIndex = 1;
@@ -477,7 +477,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.ClientSize = new System.Drawing.Size(1264, 761);
+            this.ClientSize = new System.Drawing.Size(1551, 761);
             this.Controls.Add(this.pnlMain);
             this.Controls.Add(this.pnlTopToolbar);
             this.Controls.Add(this.statusStrip1);
