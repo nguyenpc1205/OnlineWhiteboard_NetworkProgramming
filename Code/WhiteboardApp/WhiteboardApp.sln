@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.37314.3 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.7.11822.327 insiders
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhiteboardServer", "WhiteboardServer\WhiteboardServer.csproj", "{C2BF4F7D-B5C1-43F2-9B07-E5EF75F7289D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhiteboardClient", "WhiteboardClient\WhiteboardClient.csproj", "{CCB1531B-ADCB-4152-8663-0AC8B0FFC122}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhiteboardClient", "WhiteboardClient\WhiteboardClient.csproj", "{71CD806C-120E-4591-B60C-CD186C2226B8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhiteboardShared", "WhiteboardShared\WhiteboardShared.csproj", "{938A0196-7151-411B-916C-D762E08BB78F}"
 EndProject
@@ -19,10 +19,10 @@ Global
 		{C2BF4F7D-B5C1-43F2-9B07-E5EF75F7289D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2BF4F7D-B5C1-43F2-9B07-E5EF75F7289D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2BF4F7D-B5C1-43F2-9B07-E5EF75F7289D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CCB1531B-ADCB-4152-8663-0AC8B0FFC122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CCB1531B-ADCB-4152-8663-0AC8B0FFC122}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CCB1531B-ADCB-4152-8663-0AC8B0FFC122}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CCB1531B-ADCB-4152-8663-0AC8B0FFC122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71CD806C-120E-4591-B60C-CD186C2226B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71CD806C-120E-4591-B60C-CD186C2226B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71CD806C-120E-4591-B60C-CD186C2226B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71CD806C-120E-4591-B60C-CD186C2226B8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{938A0196-7151-411B-916C-D762E08BB78F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{938A0196-7151-411B-916C-D762E08BB78F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{938A0196-7151-411B-916C-D762E08BB78F}.Release|Any CPU.ActiveCfg = Release|Any CPU
