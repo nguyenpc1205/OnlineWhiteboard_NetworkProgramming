@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using Microsoft.Data.Sqlite;
-
+using System.Text;
 namespace WhiteboardServer
 {
     class Program
@@ -92,6 +92,34 @@ namespace WhiteboardServer
                 string thongTinMa = reader.GetString(2);
                 
                 Console.WriteLine($"   => Record #{maSo} | User: {tenUser} | Data: {thongTinMa}");
+            }
+        }
+
+        //Gui thong diep toi tat ca client ngoai tru sender
+        private static void BroadcastData(string message, TcpClient sender)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(message);
+
+            lock (list_clients)
+            {
+                foreach (TcpClient client in list_clients)
+                {
+                    // Không gửi lại cho chính client gửi
+                    if (client == sender)
+                        continue;
+
+                    try
+                    {
+                        NetworkStream stream = client.GetStream();
+                        stream.Write(data, 0, data.Length);
+
+                        Console.WriteLine($"[Broadcast] Da gui: {message}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Broadcast Error] {ex.Message}");
+                    }
+                }
             }
         }
     }
