@@ -41,6 +41,8 @@
             this.pnlMain = new System.Windows.Forms.Panel();
             this.pnlCanvasContainer = new System.Windows.Forms.Panel();
             this.pnlCanvas = new System.Windows.Forms.Panel();
+            this.btnColor2 = new System.Windows.Forms.Button();
+            this.btnColor1 = new System.Windows.Forms.Button();
             this.pnlRight = new System.Windows.Forms.Panel();
             this.flpOnlineUsers = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlLeftTools = new System.Windows.Forms.Panel();
@@ -50,8 +52,6 @@
             this.grpProperties = new System.Windows.Forms.GroupBox();
             this.lblBrushSizeText = new System.Windows.Forms.Label();
             this.trackBrushSize = new System.Windows.Forms.TrackBar();
-            this.btnColor2 = new System.Windows.Forms.Button();
-            this.btnColor1 = new System.Windows.Forms.Button();
             this.lblColorLabel = new System.Windows.Forms.Label();
             this.grpDrawingTools = new System.Windows.Forms.GroupBox();
             this.btnEraser = new System.Windows.Forms.Button();
@@ -62,6 +62,7 @@
             this.pnlUser.SuspendLayout();
             this.pnlMain.SuspendLayout();
             this.pnlCanvasContainer.SuspendLayout();
+            this.pnlCanvas.SuspendLayout();
             this.pnlRight.SuspendLayout();
             this.pnlLeftTools.SuspendLayout();
             this.grpActions.SuspendLayout();
@@ -73,6 +74,7 @@
             // menuStrip1
             // 
             this.menuStrip1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editToolStripMenuItem,
@@ -81,32 +83,32 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1551, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(1551, 38);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(49, 24);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(66, 34);
             this.editToolStripMenuItem.Text = "Edit";
             // 
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(62, 34);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // roomToolStripMenuItem
             // 
             this.roomToolStripMenuItem.Name = "roomToolStripMenuItem";
-            this.roomToolStripMenuItem.Size = new System.Drawing.Size(63, 24);
+            this.roomToolStripMenuItem.Size = new System.Drawing.Size(85, 34);
             this.roomToolStripMenuItem.Text = "Room";
             // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(55, 24);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(74, 34);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // statusStrip1
@@ -119,9 +121,9 @@
             this.lblTool,
             this.lblColor,
             this.lblBrushSize});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 735);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 722);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1551, 26);
+            this.statusStrip1.Size = new System.Drawing.Size(1551, 39);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -130,35 +132,35 @@
             this.lblConnectionStatus.ForeColor = System.Drawing.Color.DimGray;
             this.lblConnectionStatus.Image = ((System.Drawing.Image)(resources.GetObject("lblConnectionStatus.Image")));
             this.lblConnectionStatus.Name = "lblConnectionStatus";
-            this.lblConnectionStatus.Size = new System.Drawing.Size(256, 20);
+            this.lblConnectionStatus.Size = new System.Drawing.Size(353, 30);
             this.lblConnectionStatus.Text = "📶 Connected: 192.168.1.100:8080";
             // 
             // lblCoordinates
             // 
             this.lblCoordinates.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
             this.lblCoordinates.Name = "lblCoordinates";
-            this.lblCoordinates.Size = new System.Drawing.Size(87, 21);
+            this.lblCoordinates.Size = new System.Drawing.Size(125, 34);
             this.lblCoordinates.Text = "X: 181, Y: 14";
             // 
             // lblTool
             // 
             this.lblTool.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
             this.lblTool.Name = "lblTool";
-            this.lblTool.Size = new System.Drawing.Size(68, 21);
+            this.lblTool.Size = new System.Drawing.Size(96, 34);
             this.lblTool.Text = "Tool: Pen";
             // 
             // lblColor
             // 
             this.lblColor.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
             this.lblColor.Name = "lblColor";
-            this.lblColor.Size = new System.Drawing.Size(107, 21);
+            this.lblColor.Size = new System.Drawing.Size(149, 34);
             this.lblColor.Text = "Color: #FF0000";
             // 
             // lblBrushSize
             // 
             this.lblBrushSize.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
             this.lblBrushSize.Name = "lblBrushSize";
-            this.lblBrushSize.Size = new System.Drawing.Size(67, 21);
+            this.lblBrushSize.Size = new System.Drawing.Size(94, 34);
             this.lblBrushSize.Text = "Size: 3px";
             // 
             // pnlTopToolbar
@@ -172,7 +174,7 @@
             this.pnlTopToolbar.Controls.Add(this.btnJoinRoom);
             this.pnlTopToolbar.Controls.Add(this.btnNewRoom);
             this.pnlTopToolbar.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlTopToolbar.Location = new System.Drawing.Point(0, 28);
+            this.pnlTopToolbar.Location = new System.Drawing.Point(0, 38);
             this.pnlTopToolbar.Name = "pnlTopToolbar";
             this.pnlTopToolbar.Padding = new System.Windows.Forms.Padding(10, 8, 10, 8);
             this.pnlTopToolbar.Size = new System.Drawing.Size(1551, 45);
@@ -203,7 +205,7 @@
             this.lblUserInfo.AutoSize = true;
             this.lblUserInfo.Location = new System.Drawing.Point(34, 6);
             this.lblUserInfo.Name = "lblUserInfo";
-            this.lblUserInfo.Size = new System.Drawing.Size(110, 20);
+            this.lblUserInfo.Size = new System.Drawing.Size(158, 30);
             this.lblUserInfo.TabIndex = 1;
             this.lblUserInfo.Text = "Nguyễn Văn An";
             // 
@@ -227,7 +229,7 @@
             this.lblRoomName.Location = new System.Drawing.Point(180, 8);
             this.lblRoomName.Name = "lblRoomName";
             this.lblRoomName.Padding = new System.Windows.Forms.Padding(10, 5, 0, 0);
-            this.lblRoomName.Size = new System.Drawing.Size(180, 25);
+            this.lblRoomName.Size = new System.Drawing.Size(253, 35);
             this.lblRoomName.TabIndex = 4;
             this.lblRoomName.Text = "Room: Phòng Vẽ Chính";
             // 
@@ -265,10 +267,10 @@
             this.pnlMain.Controls.Add(this.pnlRight);
             this.pnlMain.Controls.Add(this.pnlLeftTools);
             this.pnlMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlMain.Location = new System.Drawing.Point(0, 73);
+            this.pnlMain.Location = new System.Drawing.Point(0, 83);
             this.pnlMain.Name = "pnlMain";
             this.pnlMain.Padding = new System.Windows.Forms.Padding(10);
-            this.pnlMain.Size = new System.Drawing.Size(1551, 662);
+            this.pnlMain.Size = new System.Drawing.Size(1551, 639);
             this.pnlMain.TabIndex = 3;
             // 
             // pnlCanvasContainer
@@ -278,18 +280,40 @@
             this.pnlCanvasContainer.Location = new System.Drawing.Point(150, 10);
             this.pnlCanvasContainer.Name = "pnlCanvasContainer";
             this.pnlCanvasContainer.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.pnlCanvasContainer.Size = new System.Drawing.Size(1181, 642);
+            this.pnlCanvasContainer.Size = new System.Drawing.Size(1181, 619);
             this.pnlCanvasContainer.TabIndex = 2;
             // 
             // pnlCanvas
             // 
             this.pnlCanvas.BackColor = System.Drawing.Color.White;
             this.pnlCanvas.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlCanvas.Controls.Add(this.btnColor2);
+            this.pnlCanvas.Controls.Add(this.btnColor1);
             this.pnlCanvas.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlCanvas.Location = new System.Drawing.Point(10, 0);
             this.pnlCanvas.Name = "pnlCanvas";
-            this.pnlCanvas.Size = new System.Drawing.Size(1161, 642);
+            this.pnlCanvas.Size = new System.Drawing.Size(1161, 619);
             this.pnlCanvas.TabIndex = 0;
+            // 
+            // btnColor2
+            // 
+            this.btnColor2.BackColor = System.Drawing.Color.Red;
+            this.btnColor2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnColor2.Location = new System.Drawing.Point(224, 178);
+            this.btnColor2.Name = "btnColor2";
+            this.btnColor2.Size = new System.Drawing.Size(78, 25);
+            this.btnColor2.TabIndex = 2;
+            this.btnColor2.UseVisualStyleBackColor = false;
+            // 
+            // btnColor1
+            // 
+            this.btnColor1.BackColor = System.Drawing.Color.Red;
+            this.btnColor1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnColor1.Location = new System.Drawing.Point(354, 153);
+            this.btnColor1.Name = "btnColor1";
+            this.btnColor1.Size = new System.Drawing.Size(35, 25);
+            this.btnColor1.TabIndex = 1;
+            this.btnColor1.UseVisualStyleBackColor = false;
             // 
             // pnlRight
             // 
@@ -297,7 +321,7 @@
             this.pnlRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.pnlRight.Location = new System.Drawing.Point(1331, 10);
             this.pnlRight.Name = "pnlRight";
-            this.pnlRight.Size = new System.Drawing.Size(210, 642);
+            this.pnlRight.Size = new System.Drawing.Size(210, 619);
             this.pnlRight.TabIndex = 1;
             // 
             // flpOnlineUsers
@@ -309,7 +333,7 @@
             this.flpOnlineUsers.Location = new System.Drawing.Point(0, 0);
             this.flpOnlineUsers.Name = "flpOnlineUsers";
             this.flpOnlineUsers.Padding = new System.Windows.Forms.Padding(5);
-            this.flpOnlineUsers.Size = new System.Drawing.Size(210, 642);
+            this.flpOnlineUsers.Size = new System.Drawing.Size(210, 619);
             this.flpOnlineUsers.TabIndex = 0;
             // 
             // pnlLeftTools
@@ -320,7 +344,7 @@
             this.pnlLeftTools.Dock = System.Windows.Forms.DockStyle.Left;
             this.pnlLeftTools.Location = new System.Drawing.Point(10, 10);
             this.pnlLeftTools.Name = "pnlLeftTools";
-            this.pnlLeftTools.Size = new System.Drawing.Size(140, 642);
+            this.pnlLeftTools.Size = new System.Drawing.Size(140, 619);
             this.pnlLeftTools.TabIndex = 0;
             // 
             // grpActions
@@ -341,7 +365,7 @@
             // 
             this.btnSaveImage.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnSaveImage.ForeColor = System.Drawing.Color.Black;
-            this.btnSaveImage.Location = new System.Drawing.Point(10, 60);
+            this.btnSaveImage.Location = new System.Drawing.Point(10, 68);
             this.btnSaveImage.Name = "btnSaveImage";
             this.btnSaveImage.Size = new System.Drawing.Size(120, 30);
             this.btnSaveImage.TabIndex = 1;
@@ -353,7 +377,7 @@
             // 
             this.btnClearAll.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnClearAll.ForeColor = System.Drawing.Color.Black;
-            this.btnClearAll.Location = new System.Drawing.Point(10, 30);
+            this.btnClearAll.Location = new System.Drawing.Point(10, 38);
             this.btnClearAll.Name = "btnClearAll";
             this.btnClearAll.Size = new System.Drawing.Size(120, 30);
             this.btnClearAll.TabIndex = 0;
@@ -365,8 +389,6 @@
             // 
             this.grpProperties.Controls.Add(this.lblBrushSizeText);
             this.grpProperties.Controls.Add(this.trackBrushSize);
-            this.grpProperties.Controls.Add(this.btnColor2);
-            this.grpProperties.Controls.Add(this.btnColor1);
             this.grpProperties.Controls.Add(this.lblColorLabel);
             this.grpProperties.Dock = System.Windows.Forms.DockStyle.Top;
             this.grpProperties.ForeColor = System.Drawing.Color.DimGray;
@@ -386,7 +408,7 @@
             this.lblBrushSizeText.Location = new System.Drawing.Point(10, 80);
             this.lblBrushSizeText.Name = "lblBrushSizeText";
             this.lblBrushSizeText.Padding = new System.Windows.Forms.Padding(2);
-            this.lblBrushSizeText.Size = new System.Drawing.Size(111, 24);
+            this.lblBrushSizeText.Size = new System.Drawing.Size(156, 34);
             this.lblBrushSizeText.TabIndex = 4;
             this.lblBrushSizeText.Text = "Brush Size: 3px";
             // 
@@ -403,33 +425,13 @@
             this.trackBrushSize.TickStyle = System.Windows.Forms.TickStyle.None;
             this.trackBrushSize.Value = 3;
             // 
-            // btnColor2
-            // 
-            this.btnColor2.BackColor = System.Drawing.Color.Red;
-            this.btnColor2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnColor2.Location = new System.Drawing.Point(52, 45);
-            this.btnColor2.Name = "btnColor2";
-            this.btnColor2.Size = new System.Drawing.Size(78, 25);
-            this.btnColor2.TabIndex = 2;
-            this.btnColor2.UseVisualStyleBackColor = false;
-            // 
-            // btnColor1
-            // 
-            this.btnColor1.BackColor = System.Drawing.Color.Red;
-            this.btnColor1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnColor1.Location = new System.Drawing.Point(10, 45);
-            this.btnColor1.Name = "btnColor1";
-            this.btnColor1.Size = new System.Drawing.Size(35, 25);
-            this.btnColor1.TabIndex = 1;
-            this.btnColor1.UseVisualStyleBackColor = false;
-            // 
             // lblColorLabel
             // 
             this.lblColorLabel.AutoSize = true;
             this.lblColorLabel.ForeColor = System.Drawing.Color.Black;
             this.lblColorLabel.Location = new System.Drawing.Point(10, 23);
             this.lblColorLabel.Name = "lblColorLabel";
-            this.lblColorLabel.Size = new System.Drawing.Size(48, 20);
+            this.lblColorLabel.Size = new System.Drawing.Size(67, 30);
             this.lblColorLabel.TabIndex = 0;
             this.lblColorLabel.Text = "Color:";
             // 
@@ -451,7 +453,7 @@
             // 
             this.btnEraser.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnEraser.ForeColor = System.Drawing.Color.Black;
-            this.btnEraser.Location = new System.Drawing.Point(10, 70);
+            this.btnEraser.Location = new System.Drawing.Point(10, 78);
             this.btnEraser.Name = "btnEraser";
             this.btnEraser.Size = new System.Drawing.Size(120, 40);
             this.btnEraser.TabIndex = 1;
@@ -464,7 +466,7 @@
             this.btnPen.BackColor = System.Drawing.Color.White;
             this.btnPen.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnPen.ForeColor = System.Drawing.Color.Black;
-            this.btnPen.Location = new System.Drawing.Point(10, 30);
+            this.btnPen.Location = new System.Drawing.Point(10, 38);
             this.btnPen.Name = "btnPen";
             this.btnPen.Size = new System.Drawing.Size(120, 40);
             this.btnPen.TabIndex = 0;
@@ -474,7 +476,7 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 30F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
             this.ClientSize = new System.Drawing.Size(1551, 761);
@@ -497,6 +499,7 @@
             this.pnlUser.PerformLayout();
             this.pnlMain.ResumeLayout(false);
             this.pnlCanvasContainer.ResumeLayout(false);
+            this.pnlCanvas.ResumeLayout(false);
             this.pnlRight.ResumeLayout(false);
             this.pnlLeftTools.ResumeLayout(false);
             this.grpActions.ResumeLayout(false);
