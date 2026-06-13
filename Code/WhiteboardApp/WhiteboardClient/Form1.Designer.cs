@@ -290,6 +290,7 @@
             this.pnlCanvas.Name = "pnlCanvas";
             this.pnlCanvas.Size = new System.Drawing.Size(1161, 642);
             this.pnlCanvas.TabIndex = 0;
+            this.pnlCanvas.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlCanvas_Paint);
             // 
             // pnlRight
             // 

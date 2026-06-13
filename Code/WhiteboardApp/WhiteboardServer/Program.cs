@@ -21,6 +21,9 @@ namespace WhiteboardServer
 
         static void Main(string[] args)
         {
+            // Thiết lập mã hóa UTF-8 cho console để hiển thị tiếng Việt đúng cách
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.InputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine(">>> Bat dau khoi tao he thong Server...");
             //Nạp thông số mạng động từ file config.ini trước khi mở socket
             DocFileConfigIni("config.ini");
