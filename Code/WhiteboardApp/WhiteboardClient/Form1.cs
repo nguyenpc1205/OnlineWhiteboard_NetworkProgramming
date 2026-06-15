@@ -127,7 +127,7 @@ namespace WhiteboardClient
 
             // Đảm bảo bảng vẽ không đè lên thanh danh sách người dùng online
             canvasPanel.SendToBack();
-<<<<<<< HEAD
+
             this.currentBrushColor = Color.Black; 
             this.brushSize = 4f;                 
             this.isEraser = false;
@@ -137,8 +137,7 @@ namespace WhiteboardClient
             {
                 flpOnlineUsers.BringToFront();
             }
-=======
->>>>>>> 9a0c51ac9a99bbad1b5f4eaa6cb2e1bd6fbc5d94
+
         }
 
         private void CanvasPanel_MouseDown(object sender, MouseEventArgs e)
@@ -166,10 +165,9 @@ namespace WhiteboardClient
                         g.DrawLine(drawingPen, lastPoint, e.Location); // Vẽ đường nối điểm cũ và điểm mới
                     }
                 }
-<<<<<<< HEAD
+
                 NetworkClient.SendDrawData(lastPoint.X, lastPoint.Y, e.Location.X, e.Location.Y, currentBrushColor, brushSize, isEraser);
-=======
->>>>>>> 9a0c51ac9a99bbad1b5f4eaa6cb2e1bd6fbc5d94
+
                 lastPoint = e.Location; // Cập nhật lại tọa độ hiện tại
             }
         }
@@ -181,7 +179,7 @@ namespace WhiteboardClient
                 isDrawing = false;
             }
         }
-<<<<<<< HEAD
+
 
         /// <summary>
         /// HÀM NHẬN VÀ VẼ: Đọc chuỗi nét vẽ từ người khác gửi tới qua Server để vẽ đè lên màn hình cục bộ
@@ -246,7 +244,6 @@ namespace WhiteboardClient
         private void pnlCanvas_Paint(object sender, PaintEventArgs e)
         {
         }
-=======
->>>>>>> 9a0c51ac9a99bbad1b5f4eaa6cb2e1bd6fbc5d94
+
     }
 }
