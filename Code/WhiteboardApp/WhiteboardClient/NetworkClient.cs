@@ -1,17 +1,19 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace WhiteboardClient 
+namespace WhiteboardClient
 {
-    class NetworkClient
+    public class NetworkClient
     {
-        static TcpClient tcpClient;
+        public static TcpClient tcpClient;
         static NetworkStream networkStream;
         static StreamWriter writer;
         static StreamReader reader;
-        static Random random = new Random();
+        internal static object client;
+        public static event Action<string> OnDataReceived;
 
         public static async Task StartClientAsync()
         {
@@ -37,56 +39,49 @@ namespace WhiteboardClient
                         {
                             string response = await reader.ReadLineAsync();
                             if (response == null) break; // Server đóng kết nối
-                            Console.WriteLine($"[SERVER] {response}");
+                            OnDataReceived?.Invoke(response);
                         }
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"[LỖI - Nhận] {ex.Message}");
                     }
+
                 });
 
-                // 3. Vòng lặp vô hạn gửi tọa độ ngẫu nhiên mỗi 1 giây
-                while (true)
+                // 3. Giữ cho kết nối luôn mở 
+                while (tcpClient.Connected)
                 {
-                    string drawCommand = GenerateDrawCommand();
-                    await writer.WriteLineAsync(drawCommand);
-                    Console.WriteLine($"[GỬI]    {drawCommand}");
-                    await Task.Delay(1000); // Đợi 1 giây
+                    await Task.Delay(100);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[LỖI] {ex.Message}");
             }
-            finally
-            {
-                writer?.Close();
-                reader?.Close();
-                networkStream?.Close();
-                tcpClient?.Close();
-                Console.WriteLine("[INFO] Đã đóng kết nối.");
-            }
         }
-
         /// <summary>
-        /// Tạo chuỗi lệnh DRAW với tọa độ ngẫu nhiên theo cú pháp:
-        /// DRAW;x1,y1,x2,y2;R,G,B;thickness
+        /// HÀM MỚI: Gửi dữ liệu nét vẽ thật từ chuột và trạng thái cục tẩy lên mạng
         /// </summary>
-        static string GenerateDrawCommand()
+       
+        public static void SendDrawData(int x1, int y1, int x2, int y2, Color color, float size, bool isEraser)
         {
-            int x1 = random.Next(0, 1920);
-            int y1 = random.Next(0, 1080);
-            int x2 = random.Next(0, 1920);
-            int y2 = random.Next(0, 1080);
+            if (tcpClient == null || !tcpClient.Connected || writer == null) return;
 
-            int r = random.Next(0, 256);
-            int g = random.Next(0, 256);
-            int b = random.Next(0, 256);
+            try
+            {
+                // Kiểm tra xem có đang bật cục tẩy hay không
+                string colorStr = isEraser ? "ERASE" : $"{color.R},{color.G},{color.B}";
 
-            int thickness = random.Next(1, 11); // Độ dày nét từ 1 đến 10
+                // Đóng gói chuỗi gửi mạng
+                string packet = $"DRAW;{x1},{y1},{x2},{y2};{colorStr};{size}";
 
-            return $"DRAW;{x1},{y1},{x2},{y2};{r},{g},{b};{thickness}";
+                writer.WriteLine(packet);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Lỗi gửi mạng] {ex.Message}");
+            }
         }
     }
 }

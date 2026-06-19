@@ -18,9 +18,15 @@ namespace WhiteboardServer
 
         // Danh sách lưu trữ các kết nối client kết nối tới hệ thống (Dành cho TV4 và TV5)
         private static List<TcpClient> clientList = new List<TcpClient>();
-
+        // Quản lý xem thiết bị Client nào đang đứng ở RoomID nào để cô lập mạng
+        private static Dictionary<TcpClient, string> clientRooms = new Dictionary<TcpClient, string>();
         static void Main(string[] args)
         {
+       
+            // Thiết lập mã hóa UTF-8 cho console để hiển thị tiếng Việt đúng cách
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.InputEncoding = System.Text.Encoding.UTF8;
+            Console.WriteLine("--- KHỞI ĐỘNG MÁY CHỦ WHITEBOARD ---");
             Console.WriteLine(">>> Bat dau khoi tao he thong Server...");
             //Nạp thông số mạng động từ file config.ini trước khi mở socket
             DocFileConfigIni("config.ini");
@@ -28,18 +34,20 @@ namespace WhiteboardServer
             // Tu dong kiem tra va tao bang du lieu ban dau
             TaoDatabaseForm();
 
+            DatabaseManager.InitializeDatabase();
+
             // --- KHU VỰC CHẠY THỬ NGHIỆM ĐỘC LẬP TẠI NHÀ ---
             Console.WriteLine("\n--- TIEN HANH KIEM TRA DATA ---");
-            
-            string duLieuTest = "DRAW;150,200;155,202;#FF0000;3";
-            LuuNetVe("NguyenVanAn", duLieuTest);
-            
-            DocLichSuPhong();
+
+            string duLieuTest = "DRAW;ROOM_101;150,200;155,202;#FF0000;3";
+            LuuNetVe("ROOM_101", "NguyenVanAn", duLieuTest);
+
+            DocLichSuPhong("ROOM_101");
             Console.WriteLine("--------------------------------\n");
 
-            // --- KHU VỰC LẬP TRÌNH SOCKET (Kế hoạch của Thành viên 4 & 5) ---
+            //  KHU VỰC LẬP TRÌNH SOCKET 
             Console.WriteLine("[SERVER] Khoi dong Socket cho Client ket noi...");
-            // Code khoi tao TcpListener cua thanh vien 4 viet tiep tai day
+
             try
             {
                 IPAddress ipAddr = IPAddress.Parse(_serverIP);
@@ -60,10 +68,6 @@ namespace WhiteboardServer
                     {
                         clientList.Add(client);
                     }
-
-                    // [THÊM MỚI]: Vừa vào phòng, lôi lịch sử cũ trong DB gửi riêng cho máy này vẽ bù lên bảng luôn
-                    DongBoLichSuChoClientMoi(client);
-
                     // Kích hoạt đa luồng xử lý riêng biệt cho Client (Giữ nguyên kiến trúc đa luồng của bạn)
                     Thread clientThread = new Thread(() => HandleClient(client));
                     clientThread.Start();
@@ -100,12 +104,50 @@ namespace WhiteboardServer
                         username = parts[0];
                         packetData = parts[1];
                     }
+                    // LOGIC TRÍCH XUẤT ROOM ID TỰ ĐỘNG ĐỂ PHÂN LUỒNG
+                    string currentRoomID = "DefaultRoom"; // Phòng mặc định nếu gói tin lỗi
+                    string[] protocolParts = packetData.Split(';');
 
-                    // Hành động 1: Ghi nhận vĩnh viễn nét vẽ này vào Database SQLite
-                    LuuNetVe(username, packetData);
+                    if (protocolParts.Length >= 2)
+                    {
+                        string command = protocolParts[0];
+                        // Nếu là lệnh DRAW/CLEAR_CANVAS từ lớp Shared: DRAW;RoomID;ToaDo...
+                        if (command == "DRAW" || command == "CLEAR_CANVAS" || command == "USER_LIST")
+                        {
+                            currentRoomID = protocolParts[1];
+                        }
+                        // Nếu là lệnh JOIN_ROOM: JOIN_ROOM;Username;RoomID
+                        else if (command == "JOIN_ROOM" && protocolParts.Length >= 3)
+                        {
+                            currentRoomID = protocolParts[2];
+                        }
+                    }
 
-                    // Hành động 2: Phát sóng chuyển tiếp nét vẽ cho toàn bộ các Client khác online
-                    BroadcastData(message, client);
+                    // Kiểm tra xem Client này đã đăng ký phòng này chưa, nếu chưa thì thực hiện map phòng và tải lịch sử
+                    bool isFirstTimeInRoom = false;
+                    lock (clientRooms)
+                    {
+                        if (!clientRooms.ContainsKey(client) || clientRooms[client] != currentRoomID)
+                        {
+                            clientRooms[client] = currentRoomID;
+                            isFirstTimeInRoom = true;
+                        }
+                    }
+
+                    if (isFirstTimeInRoom)
+                    {
+                        Console.WriteLine($"[HỆ THỐNG] Người dùng '{username}' đã vào Phòng: {currentRoomID}");
+                        // Tải và bắn ngược lịch sử ĐÚNG PHÒNG cho client vẽ đắp lại bảng
+                        DongBoLichSuChoClientMoi(client, currentRoomID);
+                    }
+
+                    if (packetData.StartsWith("DRAW"))
+                    {
+                        LuuNetVe(currentRoomID, username, packetData);
+                    }
+
+                    // Hành động 2: Phát sóng chuyển tiếp nét vẽ cho các thành viên trực thuộc CÙNG PHÒNG
+                    BroadcastData(currentRoomID, message, client);
                 }
             }
             catch (Exception)
@@ -118,10 +160,14 @@ namespace WhiteboardServer
                 {
                     clientList.Remove(client);
                 }
-                client.Close();
-                Console.WriteLine($"[NGẮT KẾT NỐI] Mot Client da thoat. Trong phong con lai: {clientList.Count} nguoi.");
+                lock (clientRooms)
+                {
+                    clientRooms.Remove(client);
+                }
+                    client.Close();
+                    Console.WriteLine($"[NGẮT KẾT NỐI] Mot Client da thoat. Trong phong con lai: {clientList.Count} nguoi.");
+                }
             }
-        }
 
         // Bộ nạp thông số file config.ini thủ công
         private static void DocFileConfigIni(string filePath)
@@ -162,6 +208,7 @@ namespace WhiteboardServer
             var sqlCheckTable = @"
                 CREATE TABLE IF NOT EXISTS DrawHistory (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    RoomID TEXT NOT NULL DEFAULT 'DefaultRoom',
                     Username TEXT NOT NULL,
                     PacketData TEXT NOT NULL,
                     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -174,33 +221,35 @@ namespace WhiteboardServer
         }
 
         // Hàm 2:bản ghi nét vẽ khi nhận được tín hiệu qua mạng
-        public static void LuuNetVe(string nguoiVe, string chuoiToaDo)
+        public static void LuuNetVe(string roomID ,string nguoiVe, string chuoiToaDo)
         {
             using var conn = new SqliteConnection(_dbPath);
             conn.Open();
 
-            var sqlInsert = "INSERT INTO DrawHistory (Username, PacketData) VALUES (@user, @packet)";
-            
+            var sqlInsert = "INSERT INTO DrawHistory (RoomID, Username, PacketData) VALUES (@room, @user, @packet)";
+
             using var cmd = new SqliteCommand(sqlInsert, conn);
             // Gán tham số trực tiếp để tối ưu hóa truy vấn
+            cmd.Parameters.AddWithValue("@room", roomID);
             cmd.Parameters.AddWithValue("@user", nguoiVe);
             cmd.Parameters.AddWithValue("@packet", chuoiToaDo);
             
             cmd.ExecuteNonQuery();
-            Console.WriteLine($"[SQLite] Da ghi net ve cua: {nguoiVe}");
+            Console.WriteLine($"[SQLite] Da ghi net ve cua: {nguoiVe} vao Phong: {roomID}");
         }
 
         // Hàm 3: Truy vấn ngược toàn bộ lịch sử để đồng bộ phòng vẽ
-        public static void DocLichSuPhong()
+        public static void DocLichSuPhong(string roomID)
         {
-            Console.WriteLine("[SQLite] Lay danh sach lich su tu file db...");
+            Console.WriteLine($"[SQLite] Lay danh sach lich su cua phong [{roomID}] tu file db...");
             
             using var conn = new SqliteConnection(_dbPath);
             conn.Open();
 
-            var sqlSelect = "SELECT Id, Username, PacketData FROM DrawHistory ORDER BY Id ASC";
+            var sqlSelect = "SELECT Id, Username, PacketData FROM DrawHistory WHERE RoomID = @room ORDER BY Id ASC";
             
             using var cmd = new SqliteCommand(sqlSelect, conn);
+            cmd.Parameters.AddWithValue("@room", roomID);
             using var reader = cmd.ExecuteReader();
             
             while (reader.Read())
@@ -208,41 +257,45 @@ namespace WhiteboardServer
                 int maSo = reader.GetInt32(0);
                 string tenUser = reader.GetString(1);
                 string thongTinMa = reader.GetString(2);
-                
-                Console.WriteLine($"   => Record #{maSo} | User: {tenUser} | Data: {thongTinMa}");
+
+                Console.WriteLine($"   => Phong: {roomID} | Record #{maSo} | User: {tenUser} | Data: {thongTinMa}");
             }
         }
         // Bắn ngược toàn bộ lịch sử lưu trong SQLite cho Client mới kết nối muộn
-        private static void DongBoLichSuChoClientMoi(TcpClient targetClient)
+        private static void DongBoLichSuChoClientMoi(TcpClient targetClient, string roomID)
         {
             try
             {
                 using var conn = new SqliteConnection(_dbPath);
                 conn.Open();
-                var sqlSelect = "SELECT Username, PacketData FROM DrawHistory ORDER BY Id ASC";
+
+                // Chỉ lấy lịch sử của phòng mà Client này khai báo tham gia
+                var sqlSelect = "SELECT Username, PacketData FROM DrawHistory WHERE RoomID = @room ORDER BY Id ASC";
                 using var cmd = new SqliteCommand(sqlSelect, conn);
+                cmd.Parameters.AddWithValue("@room", roomID);
                 using var reader = cmd.ExecuteReader();
 
                 NetworkStream stream = targetClient.GetStream();
                 StreamWriter writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
 
+                int count = 0;
                 while (reader.Read())
                 {
                     string user = reader.GetString(0);
                     string data = reader.GetString(1);
-                    // Bắn dữ liệu về cho client tự vẽ đắp lại màn hình ban đầu
                     writer.WriteLine($"{user}|{data}");
+                    count++;
                 }
-                Console.WriteLine("[SQLite] Da dong bo xong lich su ve cho Client moi.");
+                Console.WriteLine($"[SQLite] Da dong bo xong {count} net ve cu cua phong [{roomID}] cho thanh vien moi.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[SQLite Error] Dong bo lich su that bai: {ex.Message}");
+                Console.WriteLine($"[SQLite Error] Dong bo lich su phong {roomID} that bai: {ex.Message}");
             }
         }
 
         //Gui thong diep toi tat ca client ngoai tru sender
-        private static void BroadcastData(string message, TcpClient sender)
+        private static void BroadcastData(string roomID, string message, TcpClient sender)
         {
             byte[] data = Encoding.UTF8.GetBytes(message + "\n");
 
@@ -253,13 +306,18 @@ namespace WhiteboardServer
                     // Không gửi lại cho chính client gửi
                     if (client == sender)
                         continue;
+                    //CÔ LẬP PHÒNG: Kiểm tra nếu client đích không ở cùng RoomID thì bỏ qua
+                    lock (clientRooms)
+                    {
+                        if (!clientRooms.ContainsKey(client) || clientRooms[client] != roomID)
+                            continue;
+                    }
 
                     try
                     {
                         NetworkStream stream = client.GetStream();
                         stream.Write(data, 0, data.Length);
-
-                        Console.WriteLine($"[Broadcast] Da gui: {message}");
+                        Console.WriteLine($"[Broadcast Phong {roomID}] Da chuyen tiep tin nhan.");
                     }
                     catch (Exception ex)
                     {

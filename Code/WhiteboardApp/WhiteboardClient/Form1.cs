@@ -45,6 +45,27 @@ namespace WhiteboardClient
 
             // 2. Nạp danh sách thành viên ảo hiển thị lên thanh điều khiển
             LoadMockUsers();
+            // 3. ĐĂNG KÝ SỰ KIỆN: Khi mạng nhận được nét vẽ từ máy khác, tự động gọi hàm HandleNetworkData để vẽ lên màn hình của mình
+            NetworkClient.OnDataReceived += HandleNetworkData;
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                string myName = "Nguyễn Văn An";
+
+                // SỬA: Đổi từ NetworkClient.client thành NetworkClient.tcpClient
+                if (NetworkClient.tcpClient != null && NetworkClient.tcpClient.Connected)
+                {
+                    // SỬA: Đổi từ NetworkClient.client thành NetworkClient.tcpClient
+                    StreamWriter writer = new StreamWriter(NetworkClient.tcpClient.GetStream()) { AutoFlush = true };
+                    writer.WriteLine($"CONNECT;{myName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Lỗi kết nối] {ex.Message}");
+            }
         }
 
         // --- PHÂN HỆ 1: QUẢN LÝ GIAO DIỆN THÀNH VIÊN ONLINE ---
@@ -123,6 +144,17 @@ namespace WhiteboardClient
 
             // Đảm bảo bảng vẽ không đè lên thanh danh sách người dùng online
             canvasPanel.SendToBack();
+
+            this.currentBrushColor = Color.Black; 
+            this.brushSize = 4f;                 
+            this.isEraser = false;
+            this.Controls.Add(canvasPanel);
+            canvasPanel.BringToFront();
+            if (flpOnlineUsers != null)
+            {
+                flpOnlineUsers.BringToFront();
+            }
+
         }
 
         private void CanvasPanel_MouseDown(object sender, MouseEventArgs e)
@@ -150,6 +182,9 @@ namespace WhiteboardClient
                         g.DrawLine(drawingPen, lastPoint, e.Location); // Vẽ đường nối điểm cũ và điểm mới
                     }
                 }
+
+                NetworkClient.SendDrawData(lastPoint.X, lastPoint.Y, e.Location.X, e.Location.Y, currentBrushColor, brushSize, isEraser);
+
                 lastPoint = e.Location; // Cập nhật lại tọa độ hiện tại
             }
         }
@@ -160,6 +195,74 @@ namespace WhiteboardClient
             {
                 isDrawing = false;
             }
+        }
+
+
+        /// <summary>
+        /// HÀM NHẬN VÀ VẼ: Đọc chuỗi nét vẽ từ người khác gửi tới qua Server để vẽ đè lên màn hình cục bộ
+        /// </summary>
+        private void HandleNetworkData(string message)
+        {
+            // Tránh xung đột luồng giao diện khi chạy đa luồng (Thread-safe UI)
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action<string>(HandleNetworkData), message);
+                return;
+            }
+
+            try
+            {
+                string[] parts = message.Split(';');
+                string command = parts[0];
+
+                if (command == "DRAW")
+                {
+                    // Bóc tách bộ tọa độ: X1, Y1, X2, Y2
+                    string[] coords = parts[1].Split(',');
+                    int x1 = int.Parse(coords[0]);
+                    int y1 = int.Parse(coords[1]);
+                    int x2 = int.Parse(coords[2]);
+                    int y2 = int.Parse(coords[3]);
+
+                    // Bóc tách thông tin màu sắc và độ dày bút vẽ
+                    string colorInfo = parts[2];
+                    float size = float.Parse(parts[3]);
+
+                    Color drawColor;
+                    if (colorInfo == "ERASE")
+                    {
+                        drawColor = Color.White; // Nếu máy khác đang chọn tẩy, ta vẽ nét màu trắng xóa đè lên
+                    }
+                    else
+                    {
+                        string[] rgb = colorInfo.Split(',');
+                        drawColor = Color.FromArgb(int.Parse(rgb[0]), int.Parse(rgb[1]), int.Parse(rgb[2]));
+                    }
+
+                    // Tiến hành tự động vẽ nét của người khác lên bảng vẽ của mình
+                    using (Graphics g = canvasPanel.CreateGraphics())
+                    {
+                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                        using (Pen remotePen = new Pen(drawColor, size))
+                        {
+                            remotePen.StartCap = LineCap.Round;
+                            remotePen.EndCap = LineCap.Round;
+                            g.DrawLine(remotePen, new Point(x1, y1), new Point(x2, y2));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Lỗi xử lý vẽ mạng] {ex.Message}");
+            }
+        }
+
+        private void pnlCanvas_Paint(object sender, PaintEventArgs e)
+        {
+        }
+
+    }
         }
     
     private void BtnClearAll_Click(object sender, EventArgs e)
