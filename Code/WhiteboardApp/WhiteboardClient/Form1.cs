@@ -11,6 +11,8 @@ namespace WhiteboardClient
 {
     public partial class Form1 : Form
     {
+        private Button btnClearAll;
+        private Button btnSaveImage;
         // Các biến phục vụ chức năng xử lý đồ họa nét vẽ
         private bool isDrawing = false;
         private Point lastPoint;
@@ -22,6 +24,21 @@ namespace WhiteboardClient
         public Form1()
         {
             InitializeComponent();
+            // 1. Cấu hình nút Xóa Toàn Bộ (Đã thêm chữ Button ở đầu để hết đỏ)
+            Button btnClearAll = new Button();
+            btnClearAll.Text = "Xóa Toàn Bộ";
+            btnClearAll.Size = new Size(100, 30);
+            btnClearAll.Click += BtnClearAll_Click;
+
+            // 2. Cấu hình nút Lưu Ảnh (Đã thêm chữ Button ở đầu để hết đỏ)
+            Button btnSaveImage = new Button();
+            btnSaveImage.Text = "Lưu Ảnh";
+            btnSaveImage.Size = new Size(100, 30);
+            btnSaveImage.Click += BtnSaveImage_Click;
+
+            // 3. Đưa 2 nút lên Form (Đã thay chữ pnlAutomaticToolbar bằng chữ "this")
+            this.Controls.Add(btnClearAll);
+            this.Controls.Add(btnSaveImage);
 
             // 1. Tự động dựng vùng bảng vẽ lấp đầy không gian màn hình
             InitializeCanvasPanel();
@@ -144,5 +161,37 @@ namespace WhiteboardClient
                 isDrawing = false;
             }
         }
+    
+    private void BtnClearAll_Click(object sender, EventArgs e)
+        {
+            // Làm trắng bảng vẽ cục bộ ngay lập tức
+            canvasPanel.Invalidate();
+        }
+
+        private void BtnSaveImage_Click(object sender, EventArgs e)
+        {
+            // Tạo đối tượng ảnh Bitmap với kích thước bằng canvasPanel
+            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(canvasPanel.Width, canvasPanel.Height);
+
+            // Chụp lại những gì đã vẽ trên panel đưa vào bitmap
+            canvasPanel.DrawToBitmap(bitmap, new System.Drawing.Rectangle(0, 0, canvasPanel.Width, canvasPanel.Height));
+
+            // Mở hộp thoại để người dùng chọn nơi lưu file .png
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "PNG Image (*.png)|*.png";
+                saveFileDialog.Title = "Chọn nơi lưu bức tranh của bạn";
+                saveFileDialog.FileName = "Whiteboard_Export.png";
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Tiến hành lưu ảnh xuống máy
+                    bitmap.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    MessageBox.Show("Lưu ảnh thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            bitmap.Dispose();
+        }
     }
 }
+    
