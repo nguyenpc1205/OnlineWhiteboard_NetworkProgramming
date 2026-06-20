@@ -83,5 +83,19 @@ namespace WhiteboardClient
                 Console.WriteLine($"[Lỗi gửi mạng] {ex.Message}");
             }
         }
+        public static void SendMessage(string message)
+        {
+            if (tcpClient == null || !tcpClient.Connected || writer == null)
+                return;
+
+            try
+            {
+                writer.WriteLine(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Lỗi gửi mạng] {ex.Message}");
+            }
+        }
     }
 }

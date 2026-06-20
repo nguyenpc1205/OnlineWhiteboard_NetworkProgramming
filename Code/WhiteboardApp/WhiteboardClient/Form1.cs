@@ -20,8 +20,10 @@ namespace WhiteboardClient
         private float brushSize = 3f;
         private bool isEraser = false;
         private Panel canvasPanel;
-
+        private string currentRoomId = "ROOM001";
+        private string currentUserName = "Nguyễn Văn An";
         public Form1()
+
         {
             InitializeComponent();
             // 1. Cấu hình nút Xóa Toàn Bộ (Đã thêm chữ Button ở đầu để hết đỏ)
@@ -44,7 +46,7 @@ namespace WhiteboardClient
             InitializeCanvasPanel();
 
             // 2. Nạp danh sách thành viên ảo hiển thị lên thanh điều khiển
-            LoadMockUsers();
+            //LoadMockUsers();
             // 3. ĐĂNG KÝ SỰ KIỆN: Khi mạng nhận được nét vẽ từ máy khác, tự động gọi hàm HandleNetworkData để vẽ lên màn hình của mình
             NetworkClient.OnDataReceived += HandleNetworkData;
         }
@@ -125,7 +127,34 @@ namespace WhiteboardClient
             flpOnlineUsers.Controls.Add(pnlUser);
         }
 
+        private void UpdateUserList(string[] users)
+        {
+            flpOnlineUsers.Controls.Clear();
 
+            Color[] colors =
+            {
+            Color.Crimson,
+            Color.Blue,
+            Color.Green,
+            Color.Orange,
+            Color.Purple
+            };
+
+            int index = 0;
+
+            foreach (string user in users)
+            {
+                if (!string.IsNullOrWhiteSpace(user))
+                {
+                    AddUser(
+                        user.Trim(),
+                        colors[index % colors.Length]
+                    );
+
+                    index++;
+                }
+            }
+        }
         // --- PHÂN HỆ 2: KHỞI TẠO VÀ XỬ LÝ SỰ KIỆN BẢNG VẼ ---
         private void InitializeCanvasPanel()
         {
@@ -145,8 +174,8 @@ namespace WhiteboardClient
             // Đảm bảo bảng vẽ không đè lên thanh danh sách người dùng online
             canvasPanel.SendToBack();
 
-            this.currentBrushColor = Color.Black; 
-            this.brushSize = 4f;                 
+            this.currentBrushColor = Color.Black;
+            this.brushSize = 4f;
             this.isEraser = false;
             this.Controls.Add(canvasPanel);
             canvasPanel.BringToFront();
@@ -251,6 +280,33 @@ namespace WhiteboardClient
                         }
                     }
                 }
+                else if (command == "USER_LIST")
+                {
+                    if (parts.Length >= 3)
+                    {
+                        string roomId = parts[1];
+
+                        if (roomId == currentRoomId)
+                        {
+                            string[] users =
+                                parts[2].Split(',');
+
+                            UpdateUserList(users);
+                        }
+                    }
+                }
+                else if (command == "CLEAR_CANVAS")
+                {
+                    if (parts.Length >= 2)
+                    {
+                        string roomId = parts[1];
+
+                        if (roomId == currentRoomId)
+                        {
+                            ClearCanvas();
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -262,13 +318,19 @@ namespace WhiteboardClient
         {
         }
 
-    }
+        private void ClearCanvas()
+        {
+            canvasPanel.Invalidate();
         }
-    
-    private void BtnClearAll_Click(object sender, EventArgs e)
+
+        private void BtnClearAll_Click(object sender, EventArgs e)
         {
             // Làm trắng bảng vẽ cục bộ ngay lập tức
-            canvasPanel.Invalidate();
+            ClearCanvas();
+
+            NetworkClient.SendMessage(
+                $"CLEAR_CANVAS;{currentRoomId}"
+            );
         }
 
         private void BtnSaveImage_Click(object sender, EventArgs e)
@@ -297,4 +359,4 @@ namespace WhiteboardClient
         }
     }
 }
-    
+
