@@ -2,191 +2,446 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using System.IO;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace WhiteboardClient
 {
     public partial class Form1 : Form
     {
-        private Button btnClearAll;
-        private Button btnSaveImage;
-        // Các biến phục vụ chức năng xử lý đồ họa nét vẽ
         private bool isDrawing = false;
         private Point lastPoint;
         private Color currentBrushColor = Color.Black;
         private float brushSize = 3f;
         private bool isEraser = false;
-        private Panel canvasPanel;
-        private string currentRoomId = "ROOM001";
-        private string currentUserName = "Nguyễn Văn An";
-        public Form1()
+        private Panel? canvasPanel;
+        private Panel? leftPanel;
+        private Panel? rightPanel;
+        private Panel? topPanel;
+        private Panel? statusPanel;
+        private Label? statusLabel;
+        private string currentRoomId;
+        private string currentUserName;
+        private TrackBar? brushSizeTrackBar;
+        private Label? brushSizeLabel;
 
+        public Form1(string userName = "Ẩn danh", string roomId = "ROOM001")
         {
+            currentUserName = userName;
+            currentRoomId = roomId;
             InitializeComponent();
-            // 1. Cấu hình nút Xóa Toàn Bộ (Đã thêm chữ Button ở đầu để hết đỏ)
-            Button btnClearAll = new Button();
-            btnClearAll.Text = "Xóa Toàn Bộ";
-            btnClearAll.Size = new Size(100, 30);
-            btnClearAll.Click += BtnClearAll_Click;
 
-            // 2. Cấu hình nút Lưu Ảnh (Đã thêm chữ Button ở đầu để hết đỏ)
-            Button btnSaveImage = new Button();
-            btnSaveImage.Text = "Lưu Ảnh";
-            btnSaveImage.Size = new Size(100, 30);
-            btnSaveImage.Click += BtnSaveImage_Click;
+            this.Text = $"Whiteboard Client - {userName} (Phòng: {roomId})";
+            this.Size = new Size(1200, 700);
+            this.StartPosition = FormStartPosition.CenterScreen;
 
-            // 3. Đưa 2 nút lên Form (Đã thay chữ pnlAutomaticToolbar bằng chữ "this")
-            this.Controls.Add(btnClearAll);
-            this.Controls.Add(btnSaveImage);
+            // Tạo menu bar
+            CreateMenuBar();
+            
+            // Tạo top panel (thông tin phòng)
+            CreateTopPanel();
 
-            // 1. Tự động dựng vùng bảng vẽ lấp đầy không gian màn hình
-            InitializeCanvasPanel();
+            // Tạo left panel (Drawing Tools, Properties, Actions)
+            CreateLeftPanel();
 
-            // 2. Nạp danh sách thành viên ảo hiển thị lên thanh điều khiển
-            //LoadMockUsers();
-            // 3. ĐĂNG KÝ SỰ KIỆN: Khi mạng nhận được nét vẽ từ máy khác, tự động gọi hàm HandleNetworkData để vẽ lên màn hình của mình
+            // Tạo right panel (Online Users)
+            CreateRightPanel();
+
+            // Tạo canvas (vùng vẽ chính)
+            CreateCanvasPanel();
+
+            // Tạo status bar
+            CreateStatusBar();
+
+            // Đăng ký sự kiện mạng
             NetworkClient.OnDataReceived += HandleNetworkData;
         }
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            try
-            {
-                string myName = "Nguyễn Văn An";
 
-                // SỬA: Đổi từ NetworkClient.client thành NetworkClient.tcpClient
-                if (NetworkClient.tcpClient != null && NetworkClient.tcpClient.Connected)
-                {
-                    // SỬA: Đổi từ NetworkClient.client thành NetworkClient.tcpClient
-                    StreamWriter writer = new StreamWriter(NetworkClient.tcpClient.GetStream()) { AutoFlush = true };
-                    writer.WriteLine($"CONNECT;{myName}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Lỗi kết nối] {ex.Message}");
-            }
+        private void CreateMenuBar()
+        {
+            MenuStrip menuStrip = new MenuStrip();
+
+            // File Menu
+            ToolStripMenuItem fileMenu = new ToolStripMenuItem("File");
+            fileMenu.DropDownItems.Add("Exit", null, (s, e) => this.Close());
+            menuStrip.Items.Add(fileMenu);
+
+            // Edit Menu
+            ToolStripMenuItem editMenu = new ToolStripMenuItem("Edit");
+            editMenu.DropDownItems.Add("Clear Canvas", null, (s, e) => ClearCanvasAndBroadcast());
+            menuStrip.Items.Add(editMenu);
+
+            // Room Menu
+            ToolStripMenuItem roomMenu = new ToolStripMenuItem("Room");
+            roomMenu.DropDownItems.Add($"Current: {currentRoomId}", null, null);
+            menuStrip.Items.Add(roomMenu);
+
+            // Help Menu
+            ToolStripMenuItem helpMenu = new ToolStripMenuItem("Help");
+            helpMenu.DropDownItems.Add("About", null, (s, e) => 
+                MessageBox.Show("Online Whiteboard v1.0\nCollaborative Drawing Application", "About"));
+            menuStrip.Items.Add(helpMenu);
+
+            this.Controls.Add(menuStrip);
+            menuStrip.Dock = DockStyle.Top;
         }
 
-        // --- PHÂN HỆ 1: QUẢN LÝ GIAO DIỆN THÀNH VIÊN ONLINE ---
-        private void LoadMockUsers()
+        private void CreateTopPanel()
         {
-            AddUser("Nguyễn Văn An", Color.Crimson);
-            AddUser("Trần Thị Bình", Color.LimeGreen);
-            AddUser("Lê Minh Cường", Color.Blue);
-            AddUser("Phạm Thu Dung", Color.Magenta);
-        }
-
-        private void AddUser(string name, Color avatarColor)
-        {
-            Panel pnlUser = new Panel();
-            pnlUser.Width = flpOnlineUsers.Width - 15;
-            pnlUser.Height = 50;
-            pnlUser.Margin = new Padding(0, 0, 0, 5);
-            pnlUser.BackColor = Color.White;
-
-            Panel pnlBorder = new Panel();
-            pnlBorder.Height = 1;
-            pnlBorder.Dock = DockStyle.Bottom;
-            pnlBorder.BackColor = Color.LightGray;
-            pnlUser.Controls.Add(pnlBorder);
-
-            Label lblAvatar = new Label();
-            lblAvatar.Text = name[0].ToString().ToUpper();
-            lblAvatar.Size = new Size(30, 30);
-            lblAvatar.Location = new Point(5, 10);
-            lblAvatar.BackColor = avatarColor;
-            lblAvatar.ForeColor = Color.White;
-            lblAvatar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            lblAvatar.TextAlign = ContentAlignment.MiddleCenter;
-            pnlUser.Controls.Add(lblAvatar);
-
-            Label lblName = new Label();
-            lblName.Text = name;
-            lblName.Location = new Point(45, 8);
-            lblName.AutoSize = true;
-            lblName.Font = new Font("Segoe UI", 9F);
-            pnlUser.Controls.Add(lblName);
-
-            Label lblStatus = new Label();
-            lblStatus.Text = " ■  Online";
-            lblStatus.Location = new Point(45, 25);
-            lblStatus.AutoSize = true;
-            lblStatus.ForeColor = Color.LimeGreen;
-            lblStatus.Font = new Font("Segoe UI", 8F);
-            pnlUser.Controls.Add(lblStatus);
-
-            Label lblColorBadge = new Label();
-            lblColorBadge.Size = new Size(15, 15);
-            lblColorBadge.Location = new Point(170, 17);
-            lblColorBadge.BackColor = avatarColor;
-            pnlUser.Controls.Add(lblColorBadge);
-
-            flpOnlineUsers.Controls.Add(pnlUser);
-        }
-
-        private void UpdateUserList(string[] users)
-        {
-            flpOnlineUsers.Controls.Clear();
-
-            Color[] colors =
+            topPanel = new Panel
             {
-            Color.Crimson,
-            Color.Blue,
-            Color.Green,
-            Color.Orange,
-            Color.Purple
+                Height = 60,
+                BackColor = Color.FromArgb(240, 240, 240),
+                Dock = DockStyle.Top,
+                BorderStyle = BorderStyle.FixedSingle
             };
 
-            int index = 0;
-
-            foreach (string user in users)
+            Label lblRoom = new Label
             {
-                if (!string.IsNullOrWhiteSpace(user))
-                {
-                    AddUser(
-                        user.Trim(),
-                        colors[index % colors.Length]
-                    );
+                Text = $"📍 Phòng: {currentRoomId}",
+                AutoSize = true,
+                Location = new Point(15, 15),
+                Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(50, 100, 200)
+            };
 
-                    index++;
-                }
-            }
+            Label lblUser = new Label
+            {
+                Text = $"👤 Người dùng: {currentUserName}",
+                AutoSize = true,
+                Location = new Point(250, 15),
+                Font = new Font("Segoe UI", 11F),
+                ForeColor = Color.FromArgb(50, 50, 50)
+            };
+
+            topPanel.Controls.Add(lblRoom);
+            topPanel.Controls.Add(lblUser);
+            this.Controls.Add(topPanel);
         }
-        // --- PHÂN HỆ 2: KHỞI TẠO VÀ XỬ LÝ SỰ KIỆN BẢNG VẼ ---
-        private void InitializeCanvasPanel()
+
+        private void CreateLeftPanel()
+        {
+            leftPanel = new Panel
+            {
+                Width = 200,
+                BackColor = Color.FromArgb(250, 250, 250),
+                Dock = DockStyle.Left,
+                BorderStyle = BorderStyle.FixedSingle,
+                AutoScroll = true
+            };
+
+            int yPos = 10;
+
+            // === DRAWING TOOLS ===
+            Label lblTools = new Label
+            {
+                Text = "🖌️ Drawing Tools",
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Location = new Point(10, yPos),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(50, 100, 200)
+            };
+            leftPanel.Controls.Add(lblTools);
+            yPos += 35;
+
+            // Pen Button
+            Button btnPen = new Button
+            {
+                Text = "✏️ Pen",
+                Size = new Size(170, 35),
+                Location = new Point(10, yPos),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(100, 150, 255),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+            };
+            btnPen.Click += (s, e) =>
+            {
+                isEraser = false;
+                btnPen.BackColor = Color.FromArgb(50, 100, 200);
+                btnPen.ForeColor = Color.White;
+            };
+            leftPanel.Controls.Add(btnPen);
+            yPos += 40;
+
+            // Eraser Button
+            Button btnEraser = new Button
+            {
+                Text = "🧹 Eraser",
+                Size = new Size(170, 35),
+                Location = new Point(10, yPos),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(220, 220, 220),
+                ForeColor = Color.FromArgb(100, 100, 100),
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+            };
+            btnEraser.Click += (s, e) =>
+            {
+                isEraser = true;
+                btnEraser.BackColor = Color.FromArgb(255, 100, 100);
+                btnEraser.ForeColor = Color.White;
+            };
+            leftPanel.Controls.Add(btnEraser);
+            yPos += 50;
+
+            // === PROPERTIES ===
+            Label lblProperties = new Label
+            {
+                Text = "⚙️ Properties",
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Location = new Point(10, yPos),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(50, 100, 200)
+            };
+            leftPanel.Controls.Add(lblProperties);
+            yPos += 35;
+
+            // Color Label
+            Label lblColor = new Label
+            {
+                Text = "Màu sắc:",
+                Font = new Font("Segoe UI", 9F),
+                Location = new Point(10, yPos),
+                AutoSize = true
+            };
+            leftPanel.Controls.Add(lblColor);
+            yPos += 25;
+
+            // Color Picker Button
+            Panel pnlColorPicker = new Panel
+            {
+                Size = new Size(170, 40),
+                Location = new Point(10, yPos),
+                BackColor = currentBrushColor,
+                BorderStyle = BorderStyle.FixedSingle,
+                Cursor = Cursors.Hand
+            };
+            pnlColorPicker.Click += (s, e) =>
+            {
+                ColorDialog colorDialog = new ColorDialog();
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    currentBrushColor = colorDialog.Color;
+                    pnlColorPicker.BackColor = currentBrushColor;
+                }
+            };
+            leftPanel.Controls.Add(pnlColorPicker);
+            yPos += 50;
+
+            // Brush Size Label
+            brushSizeLabel = new Label
+            {
+                Text = $"Kích thước: {brushSize:F1}px",
+                Font = new Font("Segoe UI", 9F),
+                Location = new Point(10, yPos),
+                AutoSize = true
+            };
+            leftPanel.Controls.Add(brushSizeLabel);
+            yPos += 25;
+
+            // Brush Size Slider
+            brushSizeTrackBar = new TrackBar
+            {
+                Minimum = 1,
+                Maximum = 20,
+                Value = (int)brushSize,
+                Size = new Size(170, 45),
+                Location = new Point(10, yPos),
+                TickStyle = TickStyle.BottomRight
+            };
+            brushSizeTrackBar.ValueChanged += (s, e) =>
+            {
+                brushSize = brushSizeTrackBar.Value;
+                brushSizeLabel!.Text = $"Kích thước: {brushSize:F1}px";
+            };
+            leftPanel.Controls.Add(brushSizeTrackBar);
+            yPos += 50;
+
+            // === ACTIONS ===
+            Label lblActions = new Label
+            {
+                Text = "📋 Actions",
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Location = new Point(10, yPos),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(50, 100, 200)
+            };
+            leftPanel.Controls.Add(lblActions);
+            yPos += 35;
+
+            // Clear All Button
+            Button btnClearAll = new Button
+            {
+                Text = "🗑️ Clear All",
+                Size = new Size(170, 35),
+                Location = new Point(10, yPos),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(255, 150, 150),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+            };
+            btnClearAll.Click += (s, e) => ClearCanvasAndBroadcast();
+            leftPanel.Controls.Add(btnClearAll);
+            yPos += 40;
+
+            // Save Image Button
+            Button btnSaveImage = new Button
+            {
+                Text = "💾 Save Image",
+                Size = new Size(170, 35),
+                Location = new Point(10, yPos),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(100, 200, 100),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+            };
+            btnSaveImage.Click += (s, e) => SaveImage();
+            leftPanel.Controls.Add(btnSaveImage);
+
+            this.Controls.Add(leftPanel);
+        }
+
+        private void CreateRightPanel()
+        {
+            rightPanel = new Panel
+            {
+                Width = 200,
+                BackColor = Color.FromArgb(240, 240, 240),
+                Dock = DockStyle.Right,
+                BorderStyle = BorderStyle.FixedSingle
+            };
+
+            Label lblOnlineUsers = new Label
+            {
+                Text = "👥 Online Users",
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Location = new Point(10, 10),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(50, 100, 200)
+            };
+            rightPanel.Controls.Add(lblOnlineUsers);
+
+            FlowLayoutPanel flpUsers = new FlowLayoutPanel
+            {
+                AutoScroll = true,
+                Location = new Point(0, 40),
+                Size = new Size(200, rightPanel.Height - 40),
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false
+            };
+
+            // Mock users
+            AddUserToPanel(flpUsers, "Nguyễn Văn An", Color.Crimson);
+            AddUserToPanel(flpUsers, "Trần Thị Bình", Color.LimeGreen);
+            AddUserToPanel(flpUsers, "Lê Minh Cường", Color.Blue);
+            AddUserToPanel(flpUsers, "Phạm Thu Dung", Color.Magenta);
+
+            rightPanel.Controls.Add(flpUsers);
+            this.Controls.Add(rightPanel);
+        }
+
+        private void AddUserToPanel(FlowLayoutPanel flpUsers, string name, Color avatarColor)
+        {
+            Panel pnlUser = new Panel
+            {
+                Width = flpUsers.Width - 20,
+                Height = 50,
+                Margin = new Padding(0, 0, 0, 5),
+                BackColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle
+            };
+
+            Label lblAvatar = new Label
+            {
+                Text = name[0].ToString().ToUpper(),
+                Size = new Size(30, 30),
+                Location = new Point(5, 10),
+                BackColor = avatarColor,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            pnlUser.Controls.Add(lblAvatar);
+
+            Label lblName = new Label
+            {
+                Text = name,
+                Location = new Point(45, 8),
+                AutoSize = true,
+                Font = new Font("Segoe UI", 9F)
+            };
+            pnlUser.Controls.Add(lblName);
+
+            Label lblStatus = new Label
+            {
+                Text = "● Online",
+                Location = new Point(45, 25),
+                AutoSize = true,
+                ForeColor = Color.LimeGreen,
+                Font = new Font("Segoe UI", 8F)
+            };
+            pnlUser.Controls.Add(lblStatus);
+
+            flpUsers.Controls.Add(pnlUser);
+        }
+
+        private void CreateCanvasPanel()
         {
             canvasPanel = new Panel
             {
-                Dock = DockStyle.Fill, // Tự động lấp đầy phần diện tích còn lại của Form
-                BackColor = Color.White
+                BackColor = Color.White,
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.FixedSingle
             };
 
-            // Gắn 3 sự kiện tương tác chuột thiết yếu vào bảng vẽ
             canvasPanel.MouseDown += CanvasPanel_MouseDown;
             canvasPanel.MouseMove += CanvasPanel_MouseMove;
             canvasPanel.MouseUp += CanvasPanel_MouseUp;
 
-            this.Controls.Add(canvasPanel); // Đưa bảng vẽ lên trên giao diện
-
-            // Đảm bảo bảng vẽ không đè lên thanh danh sách người dùng online
-            canvasPanel.SendToBack();
-
-            this.currentBrushColor = Color.Black;
-            this.brushSize = 4f;
-            this.isEraser = false;
             this.Controls.Add(canvasPanel);
-            canvasPanel.BringToFront();
-            if (flpOnlineUsers != null)
-            {
-                flpOnlineUsers.BringToFront();
-            }
-
         }
 
-        private void CanvasPanel_MouseDown(object sender, MouseEventArgs e)
+        private void CreateStatusBar()
+        {
+            statusPanel = new Panel
+            {
+                Height = 25,
+                BackColor = Color.FromArgb(50, 50, 50),
+                Dock = DockStyle.Bottom,
+                BorderStyle = BorderStyle.FixedSingle
+            };
+
+            statusLabel = new Label
+            {
+                Text = $"🟢 Connected: 192.168.1.100:8080 | X: 0, Y: 0 | Tool: Pen | Color: #000000 | Size: 3px",
+                ForeColor = Color.White,
+                Location = new Point(5, 3),
+                Font = new Font("Segoe UI", 8F),
+                AutoSize = false,
+                Size = new Size(statusPanel.Width - 10, statusPanel.Height - 6)
+            };
+
+            statusPanel.Controls.Add(statusLabel);
+            this.Controls.Add(statusPanel);
+        }
+
+        private void Form1_Load(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (NetworkClient.tcpClient != null && NetworkClient.tcpClient.Connected)
+                {
+                    StreamWriter writer = new StreamWriter(NetworkClient.tcpClient.GetStream()) { AutoFlush = true };
+                    writer.WriteLine($"CONNECT;{currentUserName}");
+                    UpdateStatus("Connected!");
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Connection Error: {ex.Message}");
+            }
+        }
+
+        private void CanvasPanel_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -195,30 +450,31 @@ namespace WhiteboardClient
             }
         }
 
-        private void CanvasPanel_MouseMove(object sender, MouseEventArgs e)
+        private void CanvasPanel_MouseMove(object? sender, MouseEventArgs e)
         {
-            if (isDrawing)
+            if (isDrawing && canvasPanel != null)
             {
                 using (Graphics g = canvasPanel.CreateGraphics())
                 {
-                    g.SmoothingMode = SmoothingMode.AntiAlias; // Làm mượt nét vẽ, chống răng cưa
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
                     Color activeColor = isEraser ? Color.White : currentBrushColor;
 
                     using (Pen drawingPen = new Pen(activeColor, brushSize))
                     {
-                        drawingPen.StartCap = LineCap.Round; // Bo tròn điểm đầu nét vẽ
-                        drawingPen.EndCap = LineCap.Round;   // Bo tròn điểm cuối nét vẽ
-                        g.DrawLine(drawingPen, lastPoint, e.Location); // Vẽ đường nối điểm cũ và điểm mới
+                        drawingPen.StartCap = LineCap.Round;
+                        drawingPen.EndCap = LineCap.Round;
+                        g.DrawLine(drawingPen, lastPoint, e.Location);
                     }
                 }
 
                 NetworkClient.SendDrawData(lastPoint.X, lastPoint.Y, e.Location.X, e.Location.Y, currentBrushColor, brushSize, isEraser);
-
-                lastPoint = e.Location; // Cập nhật lại tọa độ hiện tại
+                lastPoint = e.Location;
+                
+                UpdateStatus($"X: {e.X}, Y: {e.Y}");
             }
         }
 
-        private void CanvasPanel_MouseUp(object sender, MouseEventArgs e)
+        private void CanvasPanel_MouseUp(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -226,41 +482,36 @@ namespace WhiteboardClient
             }
         }
 
-
-        /// <summary>
-        /// HÀM NHẬN VÀ VẼ: Đọc chuỗi nét vẽ từ người khác gửi tới qua Server để vẽ đè lên màn hình cục bộ
-        /// </summary>
         private void HandleNetworkData(string message)
         {
-            // Tránh xung đột luồng giao diện khi chạy đa luồng (Thread-safe UI)
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action<string>(HandleNetworkData), message);
                 return;
             }
 
+            if (canvasPanel == null) return;
+
             try
             {
                 string[] parts = message.Split(';');
                 string command = parts[0];
 
-                if (command == "DRAW")
+                if (command == "DRAW" && parts.Length >= 4)
                 {
-                    // Bóc tách bộ tọa độ: X1, Y1, X2, Y2
                     string[] coords = parts[1].Split(',');
                     int x1 = int.Parse(coords[0]);
                     int y1 = int.Parse(coords[1]);
                     int x2 = int.Parse(coords[2]);
                     int y2 = int.Parse(coords[3]);
 
-                    // Bóc tách thông tin màu sắc và độ dày bút vẽ
                     string colorInfo = parts[2];
                     float size = float.Parse(parts[3]);
 
                     Color drawColor;
                     if (colorInfo == "ERASE")
                     {
-                        drawColor = Color.White; // Nếu máy khác đang chọn tẩy, ta vẽ nét màu trắng xóa đè lên
+                        drawColor = Color.White;
                     }
                     else
                     {
@@ -268,7 +519,6 @@ namespace WhiteboardClient
                         drawColor = Color.FromArgb(int.Parse(rgb[0]), int.Parse(rgb[1]), int.Parse(rgb[2]));
                     }
 
-                    // Tiến hành tự động vẽ nét của người khác lên bảng vẽ của mình
                     using (Graphics g = canvasPanel.CreateGraphics())
                     {
                         g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -280,83 +530,65 @@ namespace WhiteboardClient
                         }
                     }
                 }
-                else if (command == "USER_LIST")
+                else if (command == "CLEAR_CANVAS" && parts.Length >= 2)
                 {
-                    if (parts.Length >= 3)
+                    string roomId = parts[1];
+                    if (roomId == currentRoomId)
                     {
-                        string roomId = parts[1];
-
-                        if (roomId == currentRoomId)
-                        {
-                            string[] users =
-                                parts[2].Split(',');
-
-                            UpdateUserList(users);
-                        }
-                    }
-                }
-                else if (command == "CLEAR_CANVAS")
-                {
-                    if (parts.Length >= 2)
-                    {
-                        string roomId = parts[1];
-
-                        if (roomId == currentRoomId)
-                        {
-                            ClearCanvas();
-                        }
+                        ClearCanvas();
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Lỗi xử lý vẽ mạng] {ex.Message}");
+                Console.WriteLine($"[Lỗi xử lý vẽ] {ex.Message}");
             }
         }
 
-        private void pnlCanvas_Paint(object sender, PaintEventArgs e)
+        private void ClearCanvasAndBroadcast()
         {
+            ClearCanvas();
+            NetworkClient.SendMessage($"CLEAR_CANVAS;{currentRoomId}");
+            UpdateStatus("Canvas cleared");
         }
 
         private void ClearCanvas()
         {
-            canvasPanel.Invalidate();
+            if (canvasPanel != null)
+                canvasPanel.Invalidate();
         }
 
-        private void BtnClearAll_Click(object sender, EventArgs e)
+        private void SaveImage()
         {
-            // Làm trắng bảng vẽ cục bộ ngay lập tức
-            ClearCanvas();
+            if (canvasPanel == null) return;
 
-            NetworkClient.SendMessage(
-                $"CLEAR_CANVAS;{currentRoomId}"
-            );
-        }
-
-        private void BtnSaveImage_Click(object sender, EventArgs e)
-        {
-            // Tạo đối tượng ảnh Bitmap với kích thước bằng canvasPanel
             System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(canvasPanel.Width, canvasPanel.Height);
-
-            // Chụp lại những gì đã vẽ trên panel đưa vào bitmap
             canvasPanel.DrawToBitmap(bitmap, new System.Drawing.Rectangle(0, 0, canvasPanel.Width, canvasPanel.Height));
 
-            // Mở hộp thoại để người dùng chọn nơi lưu file .png
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
                 saveFileDialog.Filter = "PNG Image (*.png)|*.png";
-                saveFileDialog.Title = "Chọn nơi lưu bức tranh của bạn";
+                saveFileDialog.Title = "Chọn nơi lưu bức tranh";
                 saveFileDialog.FileName = "Whiteboard_Export.png";
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Tiến hành lưu ảnh xuống máy
                     bitmap.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
                     MessageBox.Show("Lưu ảnh thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    UpdateStatus($"Image saved: {saveFileDialog.FileName}");
                 }
             }
             bitmap.Dispose();
         }
+
+        private void UpdateStatus(string message)
+        {
+            if (statusLabel != null)
+            {
+                string toolName = isEraser ? "Eraser" : "Pen";
+                string colorHex = $"#{currentBrushColor.R:X2}{currentBrushColor.G:X2}{currentBrushColor.B:X2}";
+                statusLabel.Text = $"🟢 {message} | Tool: {toolName} | Color: {colorHex} | Size: {brushSize:F0}px";
+            }
+        }
     }
 }
-
