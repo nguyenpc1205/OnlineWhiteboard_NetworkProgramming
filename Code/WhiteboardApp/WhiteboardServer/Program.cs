@@ -293,36 +293,50 @@ namespace WhiteboardServer
                 Console.WriteLine($"[SQLite Error] Dong bo lich su phong {roomID} that bai: {ex.Message}");
             }
         }
-
-        //Gui thong diep toi tat ca client ngoai tru sender
+        // roomChannels: roomID -> danh sách client đang ở trong phòng đó
+        private static Dictionary<string, List<TcpClient>> roomChannels = new Dictionary<string, List<TcpClient>>();
+        
         private static void BroadcastData(string roomID, string message, TcpClient sender)
         {
             byte[] data = Encoding.UTF8.GetBytes(message + "\n");
-
-            lock (clientList)
+            
+            List<TcpClient> clientsInRoom;
+            
+            lock (roomChannels)
             {
-                foreach (TcpClient client in clientList)
+                if (!roomChannels.TryGetValue(roomID, out clientsInRoom) || clientsInRoom.Count == 0)
                 {
-                    // Không gửi lại cho chính client gửi
-                    if (client == sender)
-                        continue;
-                    //CÔ LẬP PHÒNG: Kiểm tra nếu client đích không ở cùng RoomID thì bỏ qua
-                    lock (clientRooms)
-                    {
-                        if (!clientRooms.ContainsKey(client) || clientRooms[client] != roomID)
-                            continue;
-                    }
-
-                    try
-                    {
-                        NetworkStream stream = client.GetStream();
-                        stream.Write(data, 0, data.Length);
-                        Console.WriteLine($"[Broadcast Phong {roomID}] Da chuyen tiep tin nhan.");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[Broadcast Error] {ex.Message}");
-                    }
+                    Console.WriteLine($"[Broadcast] Phòng {roomID} không có client nào.");
+                    return;
+                }
+                // Copy ra list mới để gửi data bên ngoài lock (tránh block các client khác join/leave room)
+                clientsInRoom = new List<TcpClient>(clientsInRoom);
+            }
+            List<TcpClient> deadClients = null;
+            foreach (TcpClient client in clientsInRoom)
+            {
+                // Không gửi lại cho chính client vừa gửi
+                if (client == sender)
+                    continue;
+                try
+                {
+                    NetworkStream stream = client.GetStream();
+                    stream.Write(data, 0, data.Length);
+                    Console.WriteLine($"[Broadcast Phòng {roomID}] Đã chuyển tiếp nét vẽ.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Broadcast Error - Phòng {roomID}] {ex.Message}");
+                    (deadClients ??= new List<TcpClient>()).Add(client);
+                }
+            }
+            // Dọn các client đã rớt kết nối khỏi room
+            if (deadClients != null)
+            {
+                lock (roomChannels)
+                {
+                    foreach (var dead in deadClients)
+                        clientsInRoom.Remove(dead); // hoặc roomChannels[roomID].Remove(dead);
                 }
             }
         }
