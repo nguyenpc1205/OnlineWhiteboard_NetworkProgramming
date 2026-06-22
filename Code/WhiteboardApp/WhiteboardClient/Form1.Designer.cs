@@ -41,8 +41,6 @@
             this.pnlMain = new System.Windows.Forms.Panel();
             this.pnlCanvasContainer = new System.Windows.Forms.Panel();
             this.pnlCanvas = new System.Windows.Forms.Panel();
-            this.btnColor2 = new System.Windows.Forms.Button();
-            this.btnColor1 = new System.Windows.Forms.Button();
             this.pnlRight = new System.Windows.Forms.Panel();
             this.flpOnlineUsers = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlLeftTools = new System.Windows.Forms.Panel();
@@ -50,6 +48,8 @@
             this.btnSaveImage = new System.Windows.Forms.Button();
             this.btnClearAll = new System.Windows.Forms.Button();
             this.grpProperties = new System.Windows.Forms.GroupBox();
+            this.btnColor1 = new System.Windows.Forms.Button();
+            this.btnColor2 = new System.Windows.Forms.Button();
             this.lblBrushSizeText = new System.Windows.Forms.Label();
             this.trackBrushSize = new System.Windows.Forms.TrackBar();
             this.lblColorLabel = new System.Windows.Forms.Label();
@@ -292,26 +292,6 @@
             this.pnlCanvas.TabIndex = 0;
             this.pnlCanvas.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlCanvas_Paint);
             // 
-            // btnColor2
-            // 
-            this.btnColor2.BackColor = System.Drawing.Color.Red;
-            this.btnColor2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnColor2.Location = new System.Drawing.Point(10, 46);
-            this.btnColor2.Name = "btnColor2";
-            this.btnColor2.Size = new System.Drawing.Size(78, 25);
-            this.btnColor2.TabIndex = 2;
-            this.btnColor2.UseVisualStyleBackColor = false;
-            // 
-            // btnColor1
-            // 
-            this.btnColor1.BackColor = System.Drawing.Color.Red;
-            this.btnColor1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnColor1.Location = new System.Drawing.Point(99, 46);
-            this.btnColor1.Name = "btnColor1";
-            this.btnColor1.Size = new System.Drawing.Size(35, 25);
-            this.btnColor1.TabIndex = 1;
-            this.btnColor1.UseVisualStyleBackColor = false;
-            // 
             // pnlRight
             // 
             this.pnlRight.Controls.Add(this.flpOnlineUsers);
@@ -398,6 +378,26 @@
             this.grpProperties.TabIndex = 1;
             this.grpProperties.TabStop = false;
             this.grpProperties.Text = "Properties";
+            // 
+            // btnColor1
+            // 
+            this.btnColor1.BackColor = System.Drawing.Color.Red;
+            this.btnColor1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnColor1.Location = new System.Drawing.Point(99, 46);
+            this.btnColor1.Name = "btnColor1";
+            this.btnColor1.Size = new System.Drawing.Size(35, 25);
+            this.btnColor1.TabIndex = 1;
+            this.btnColor1.UseVisualStyleBackColor = false;
+            // 
+            // btnColor2
+            // 
+            this.btnColor2.BackColor = System.Drawing.Color.Red;
+            this.btnColor2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnColor2.Location = new System.Drawing.Point(10, 46);
+            this.btnColor2.Name = "btnColor2";
+            this.btnColor2.Size = new System.Drawing.Size(78, 25);
+            this.btnColor2.TabIndex = 2;
+            this.btnColor2.UseVisualStyleBackColor = false;
             // 
             // lblBrushSizeText
             // 

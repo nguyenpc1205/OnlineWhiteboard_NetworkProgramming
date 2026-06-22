@@ -11,31 +11,31 @@ namespace WhiteboardClient
 {
     public partial class Form1 : Form
     {
-        private Button btnClearAll;
-        private Button btnSaveImage;
+       
         // Các biến phục vụ chức năng xử lý đồ họa nét vẽ
         private bool isDrawing = false;
         private Point lastPoint;
         private Color currentBrushColor = Color.Black;
         private float brushSize = 3f;
         private bool isEraser = false;
-        private Panel canvasPanel;
         private string currentRoomId = "ROOM001";
         private string currentUserName = "Nguyễn Văn An";
         public Form1()
 
         {
             InitializeComponent();
-            // 1. Cấu hình nút Xóa Toàn Bộ (Đã thêm chữ Button ở đầu để hết đỏ)
-            Button btnClearAll = new Button();
+            // 1. Cấu hình nút Xóa Toàn Bộ 
+            btnClearAll = new Button();
             btnClearAll.Text = "Xóa Toàn Bộ";
             btnClearAll.Size = new Size(100, 30);
+            btnClearAll.Location = new Point(700, 35);
             btnClearAll.Click += BtnClearAll_Click;
 
-            // 2. Cấu hình nút Lưu Ảnh (Đã thêm chữ Button ở đầu để hết đỏ)
-            Button btnSaveImage = new Button();
+            // 2. Cấu hình nút Lưu Ảnh 
+            btnSaveImage = new Button();
             btnSaveImage.Text = "Lưu Ảnh";
             btnSaveImage.Size = new Size(100, 30);
+            btnSaveImage.Location = new Point(810, 35);
             btnSaveImage.Click += BtnSaveImage_Click;
 
             // 3. Đưa 2 nút lên Form (Đã thay chữ pnlAutomaticToolbar bằng chữ "this")
@@ -43,7 +43,7 @@ namespace WhiteboardClient
             this.Controls.Add(btnSaveImage);
 
             // 1. Tự động dựng vùng bảng vẽ lấp đầy không gian màn hình
-            InitializeCanvasPanel();
+            InitializepnlCanvas();
 
             // 2. Nạp danh sách thành viên ảo hiển thị lên thanh điều khiển
             //LoadMockUsers();
@@ -156,37 +156,30 @@ namespace WhiteboardClient
             }
         }
         // --- PHÂN HỆ 2: KHỞI TẠO VÀ XỬ LÝ SỰ KIỆN BẢNG VẼ ---
-        private void InitializeCanvasPanel()
+        private void InitializepnlCanvas()
         {
-            canvasPanel = new Panel
-            {
-                Dock = DockStyle.Fill, // Tự động lấp đầy phần diện tích còn lại của Form
-                BackColor = Color.White
-            };
+            pnlCanvas.Dock = DockStyle.Fill;
+            pnlCanvas.BackColor = Color.White;
 
             // Gắn 3 sự kiện tương tác chuột thiết yếu vào bảng vẽ
-            canvasPanel.MouseDown += CanvasPanel_MouseDown;
-            canvasPanel.MouseMove += CanvasPanel_MouseMove;
-            canvasPanel.MouseUp += CanvasPanel_MouseUp;
-
-            this.Controls.Add(canvasPanel); // Đưa bảng vẽ lên trên giao diện
-
+            pnlCanvas.MouseDown += pnlCanvas_MouseDown;
+            pnlCanvas.MouseMove += pnlCanvas_MouseMove;
+            pnlCanvas.MouseUp += pnlCanvas_MouseUp;
             // Đảm bảo bảng vẽ không đè lên thanh danh sách người dùng online
-            canvasPanel.SendToBack();
+            pnlCanvas.SendToBack();
 
             this.currentBrushColor = Color.Black;
             this.brushSize = 4f;
             this.isEraser = false;
-            this.Controls.Add(canvasPanel);
-            canvasPanel.BringToFront();
-            if (flpOnlineUsers != null)
-            {
-                flpOnlineUsers.BringToFront();
-            }
+           
+       
 
+            if (flpOnlineUsers != null) flpOnlineUsers.BringToFront();
+            if (btnClearAll != null) btnClearAll.BringToFront();
+            if (btnSaveImage != null) btnSaveImage.BringToFront();
         }
 
-        private void CanvasPanel_MouseDown(object sender, MouseEventArgs e)
+        private void pnlCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -195,11 +188,11 @@ namespace WhiteboardClient
             }
         }
 
-        private void CanvasPanel_MouseMove(object sender, MouseEventArgs e)
+        private void pnlCanvas_MouseMove(object sender, MouseEventArgs e)
         {
             if (isDrawing)
             {
-                using (Graphics g = canvasPanel.CreateGraphics())
+                using (Graphics g = pnlCanvas.CreateGraphics())
                 {
                     g.SmoothingMode = SmoothingMode.AntiAlias; // Làm mượt nét vẽ, chống răng cưa
                     Color activeColor = isEraser ? Color.White : currentBrushColor;
@@ -218,7 +211,7 @@ namespace WhiteboardClient
             }
         }
 
-        private void CanvasPanel_MouseUp(object sender, MouseEventArgs e)
+        private void pnlCanvas_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -269,7 +262,7 @@ namespace WhiteboardClient
                     }
 
                     // Tiến hành tự động vẽ nét của người khác lên bảng vẽ của mình
-                    using (Graphics g = canvasPanel.CreateGraphics())
+                    using (Graphics g = pnlCanvas.CreateGraphics())
                     {
                         g.SmoothingMode = SmoothingMode.AntiAlias;
                         using (Pen remotePen = new Pen(drawColor, size))
@@ -320,7 +313,7 @@ namespace WhiteboardClient
 
         private void ClearCanvas()
         {
-            canvasPanel.Invalidate();
+            pnlCanvas.Invalidate();
         }
 
         private void BtnClearAll_Click(object sender, EventArgs e)
@@ -335,11 +328,11 @@ namespace WhiteboardClient
 
         private void BtnSaveImage_Click(object sender, EventArgs e)
         {
-            // Tạo đối tượng ảnh Bitmap với kích thước bằng canvasPanel
-            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(canvasPanel.Width, canvasPanel.Height);
+            // Tạo đối tượng ảnh Bitmap với kích thước bằng pnlCanvas
+            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(pnlCanvas.Width, pnlCanvas.Height);
 
             // Chụp lại những gì đã vẽ trên panel đưa vào bitmap
-            canvasPanel.DrawToBitmap(bitmap, new System.Drawing.Rectangle(0, 0, canvasPanel.Width, canvasPanel.Height));
+            pnlCanvas.DrawToBitmap(bitmap, new System.Drawing.Rectangle(0, 0, pnlCanvas.Width, pnlCanvas.Height));
 
             // Mở hộp thoại để người dùng chọn nơi lưu file .png
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())

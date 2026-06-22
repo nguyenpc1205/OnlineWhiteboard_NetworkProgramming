@@ -85,6 +85,12 @@ namespace WhiteboardServer
             NetworkStream stream = client.GetStream();
             StreamReader reader = new StreamReader(stream, Encoding.UTF8);
 
+            string currentRoomID = "ROOM001";
+            lock (clientRooms)
+
+            {
+                clientRooms[client] = currentRoomID;
+            }
             try
             {
                 while (true)
@@ -105,49 +111,53 @@ namespace WhiteboardServer
                         packetData = parts[1];
                     }
                     // LOGIC TRÍCH XUẤT ROOM ID TỰ ĐỘNG ĐỂ PHÂN LUỒNG
-                    string currentRoomID = "DefaultRoom"; // Phòng mặc định nếu gói tin lỗi
                     string[] protocolParts = packetData.Split(';');
 
                     if (protocolParts.Length >= 2)
                     {
                         string command = protocolParts[0];
-                        // Nếu là lệnh DRAW/CLEAR_CANVAS từ lớp Shared: DRAW;RoomID;ToaDo...
-                        if (command == "DRAW" || command == "CLEAR_CANVAS" || command == "USER_LIST")
+
+                        // Xử lý các lệnh kết nối hệ thống
+                        if (command == "CONNECT" || command == "JOIN_ROOM")
+                        {
+                            if (protocolParts.Length >= 2 && command == "CONNECT")
+                            {
+                                username = protocolParts[1];
+                            }
+
+                            // Nếu gói tin có chỉ định Room rõ ràng thì cập nhật
+                            if (command == "JOIN_ROOM" && protocolParts.Length >= 3)
+                            {
+                                currentRoomID = protocolParts[2];
+                            }
+                            else
+                            {
+                                currentRoomID = "ROOM001"; // Mặc định khớp với Client
+                            }
+
+                            lock (clientRooms)
+                            {
+                                clientRooms[client] = currentRoomID;
+                            }
+
+                            Console.WriteLine($"[HỆ THỐNG] Người dùng '{username}' đã vào Phòng: {currentRoomID}");
+                            DongBoLichSuChoClientMoi(client, currentRoomID);
+                            continue;
+                        }
+                        else if (command == "CLEAR_CANVAS" || command == "USER_LIST")
                         {
                             currentRoomID = protocolParts[1];
                         }
-                        // Nếu là lệnh JOIN_ROOM: JOIN_ROOM;Username;RoomID
-                        else if (command == "JOIN_ROOM" && protocolParts.Length >= 3)
-                        {
-                            currentRoomID = protocolParts[2];
-                        }
                     }
 
-                    // Kiểm tra xem Client này đã đăng ký phòng này chưa, nếu chưa thì thực hiện map phòng và tải lịch sử
-                    bool isFirstTimeInRoom = false;
-                    lock (clientRooms)
-                    {
-                        if (!clientRooms.ContainsKey(client) || clientRooms[client] != currentRoomID)
-                        {
-                            clientRooms[client] = currentRoomID;
-                            isFirstTimeInRoom = true;
-                        }
-                    }
-
-                    if (isFirstTimeInRoom)
-                    {
-                        Console.WriteLine($"[HỆ THỐNG] Người dùng '{username}' đã vào Phòng: {currentRoomID}");
-                        // Tải và bắn ngược lịch sử ĐÚNG PHÒNG cho client vẽ đắp lại bảng
-                        DongBoLichSuChoClientMoi(client, currentRoomID);
-                    }
-
+                    // Hành động 1: Lưu nét vẽ vào đúng phòng hiện tại
                     if (packetData.StartsWith("DRAW"))
                     {
                         LuuNetVe(currentRoomID, username, packetData);
                     }
 
-                    // Hành động 2: Phát sóng chuyển tiếp nét vẽ cho các thành viên trực thuộc CÙNG PHÒNG
-                    BroadcastData(currentRoomID, message, client);
+                    // Hành động 2: Phát sóng chuyển tiếp nét vẽ nguyên bản cho các máy khác CÙNG PHÒNG
+                    BroadcastData(currentRoomID, packetData, client);
                 }
             }
             catch (Exception)
@@ -156,18 +166,12 @@ namespace WhiteboardServer
             }
             finally
             {
-                lock (clientList)
-                {
-                    clientList.Remove(client);
-                }
-                lock (clientRooms)
-                {
-                    clientRooms.Remove(client);
-                }
-                    client.Close();
-                    Console.WriteLine($"[NGẮT KẾT NỐI] Mot Client da thoat. Trong phong con lai: {clientList.Count} nguoi.");
-                }
+                lock (clientList) { clientList.Remove(client); }
+                lock (clientRooms) { clientRooms.Remove(client); }
+                client.Close();
+                Console.WriteLine($"[NGẮT KẾT NỐI] Một Client đã thoát. Trong phòng còn lại: {clientList.Count} người.");
             }
+        }
 
         // Bộ nạp thông số file config.ini thủ công
         private static void DocFileConfigIni(string filePath)
@@ -269,8 +273,8 @@ namespace WhiteboardServer
                 using var conn = new SqliteConnection(_dbPath);
                 conn.Open();
 
-                // Chỉ lấy lịch sử của phòng mà Client này khai báo tham gia
-                var sqlSelect = "SELECT Username, PacketData FROM DrawHistory WHERE RoomID = @room ORDER BY Id ASC";
+                // Chỉ lấy chuỗi PacketData gốc để gửi trực tiếp cho Client vẽ lại
+                var sqlSelect = "SELECT PacketData FROM DrawHistory WHERE RoomID = @room ORDER BY Id ASC";
                 using var cmd = new SqliteCommand(sqlSelect, conn);
                 cmd.Parameters.AddWithValue("@room", roomID);
                 using var reader = cmd.ExecuteReader();
@@ -281,16 +285,15 @@ namespace WhiteboardServer
                 int count = 0;
                 while (reader.Read())
                 {
-                    string user = reader.GetString(0);
-                    string data = reader.GetString(1);
-                    writer.WriteLine($"{user}|{data}");
+                    string data = reader.GetString(0);
+                    writer.WriteLine(data); // Gửi chuỗi DRAW;X1,Y1... sạch sẽ không dính tên người vẽ ở đầu
                     count++;
                 }
-                Console.WriteLine($"[SQLite] Da dong bo xong {count} net ve cu cua phong [{roomID}] cho thanh vien moi.");
+                Console.WriteLine($"[SQLite] Đã đồng bộ xong {count} nét vẽ cũ của phòng [{roomID}] cho thành viên mới.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[SQLite Error] Dong bo lich su phong {roomID} that bai: {ex.Message}");
+                Console.WriteLine($"[SQLite Error] Đồng bộ lịch sử phòng {roomID} thất bại: {ex.Message}");
             }
         }
 
