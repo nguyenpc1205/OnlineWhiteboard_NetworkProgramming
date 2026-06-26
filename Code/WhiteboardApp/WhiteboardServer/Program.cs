@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Net;
@@ -16,25 +16,29 @@ namespace WhiteboardServer
         private static string _serverIP = "127.0.0.1";
         private static int _serverPort = 8888;
 
-        // Danh sách lưu trữ các kết nối client kết nối tới hệ thống (Dành cho TV4 và TV5)
-        private static List<TcpClient> clientList = new List<TcpClient>();
-        // Quản lý xem thiết bị Client nào đang đứng ở RoomID nào để cô lập mạng
+        // Quản lý các kênh phòng: RoomID => danh sách client trong phòng
+        private static Dictionary<string, List<TcpClient>> roomChannels = new Dictionary<string, List<TcpClient>>();
+        // Quản lý phòng hiện tại của mỗi client
         private static Dictionary<TcpClient, string> clientRooms = new Dictionary<TcpClient, string>();
+        private static readonly object roomLock = new object();
+        private static readonly Random random = new Random();
+
         static void Main(string[] args)
         {
-       
             // Thiết lập mã hóa UTF-8 cho console để hiển thị tiếng Việt đúng cách
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.InputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine("--- KHỞI ĐỘNG MÁY CHỦ WHITEBOARD ---");
             Console.WriteLine(">>> Bat dau khoi tao he thong Server...");
-            //Nạp thông số mạng động từ file config.ini trước khi mở socket
+            
+            // Nạp thông số mạng động từ file config.ini trước khi mở socket
             DocFileConfigIni("config.ini");
 
             // Tu dong kiem tra va tao bang du lieu ban dau
             TaoDatabaseForm();
 
-            DatabaseManager.InitializeDatabase();
+            // Nếu bạn có class DatabaseManager riêng biệt, bỏ comment dòng dưới. Nếu không có thì xóa đi nhé.
+            // DatabaseManager.InitializeDatabase();
 
             // --- KHU VỰC CHẠY THỬ NGHIỆM ĐỘC LẬP TẠI NHÀ ---
             Console.WriteLine("\n--- TIEN HANH KIEM TRA DATA ---");
@@ -45,7 +49,7 @@ namespace WhiteboardServer
             DocLichSuPhong("ROOM_101");
             Console.WriteLine("--------------------------------\n");
 
-            //  KHU VỰC LẬP TRÌNH SOCKET 
+            // KHU VỰC LẬP TRÌNH SOCKET 
             Console.WriteLine("[SERVER] Khoi dong Socket cho Client ket noi...");
 
             try
@@ -63,12 +67,7 @@ namespace WhiteboardServer
 
                     Console.WriteLine($"[SERVER] Client moi ket noi: {client.Client.RemoteEndPoint}");
 
-                    // Đồng bộ bảo vệ tài nguyên danh sách khi thêm Client mới
-                    lock (clientList)
-                    {
-                        clientList.Add(client);
-                    }
-                    // Kích hoạt đa luồng xử lý riêng biệt cho Client (Giữ nguyên kiến trúc đa luồng của bạn)
+                    // Kích hoạt đa luồng xử lý riêng biệt cho Client
                     Thread clientThread = new Thread(() => HandleClient(client));
                     clientThread.Start();
                 }
@@ -104,40 +103,38 @@ namespace WhiteboardServer
                         username = parts[0];
                         packetData = parts[1];
                     }
-                    // LOGIC TRÍCH XUẤT ROOM ID TỰ ĐỘNG ĐỂ PHÂN LUỒNG
-                    string currentRoomID = "DefaultRoom"; // Phòng mặc định nếu gói tin lỗi
+
+                    string currentRoomID = "DefaultRoom";
                     string[] protocolParts = packetData.Split(';');
+                    string command = protocolParts.Length > 0 ? protocolParts[0] : string.Empty;
+
+                    if (command == "CREATE_ROOM" && protocolParts.Length >= 3)
+                    {
+                        string requestedUsername = protocolParts[1];
+                        string requestedRoomName = protocolParts[2];
+                        currentRoomID = CreateRoom(requestedUsername, requestedRoomName);
+                        Console.WriteLine($"[ROOM] Da tao phong moi: {currentRoomID}");
+                        AddClientToRoom(client, currentRoomID);
+                        SendMessage(client, $"ROOM_CREATED;{currentRoomID}");
+                        continue;
+                    }
 
                     if (protocolParts.Length >= 2)
                     {
-                        string command = protocolParts[0];
-                        // Nếu là lệnh DRAW/CLEAR_CANVAS từ lớp Shared: DRAW;RoomID;ToaDo...
                         if (command == "DRAW" || command == "CLEAR_CANVAS" || command == "USER_LIST")
                         {
                             currentRoomID = protocolParts[1];
                         }
-                        // Nếu là lệnh JOIN_ROOM: JOIN_ROOM;Username;RoomID
                         else if (command == "JOIN_ROOM" && protocolParts.Length >= 3)
                         {
                             currentRoomID = protocolParts[2];
                         }
                     }
 
-                    // Kiểm tra xem Client này đã đăng ký phòng này chưa, nếu chưa thì thực hiện map phòng và tải lịch sử
-                    bool isFirstTimeInRoom = false;
-                    lock (clientRooms)
-                    {
-                        if (!clientRooms.ContainsKey(client) || clientRooms[client] != currentRoomID)
-                        {
-                            clientRooms[client] = currentRoomID;
-                            isFirstTimeInRoom = true;
-                        }
-                    }
-
+                    bool isFirstTimeInRoom = AddClientToRoom(client, currentRoomID);
                     if (isFirstTimeInRoom)
                     {
                         Console.WriteLine($"[HỆ THỐNG] Người dùng '{username}' đã vào Phòng: {currentRoomID}");
-                        // Tải và bắn ngược lịch sử ĐÚNG PHÒNG cho client vẽ đắp lại bảng
                         DongBoLichSuChoClientMoi(client, currentRoomID);
                     }
 
@@ -146,7 +143,6 @@ namespace WhiteboardServer
                         LuuNetVe(currentRoomID, username, packetData);
                     }
 
-                    // Hành động 2: Phát sóng chuyển tiếp nét vẽ cho các thành viên trực thuộc CÙNG PHÒNG
                     BroadcastData(currentRoomID, message, client);
                 }
             }
@@ -156,18 +152,11 @@ namespace WhiteboardServer
             }
             finally
             {
-                lock (clientList)
-                {
-                    clientList.Remove(client);
-                }
-                lock (clientRooms)
-                {
-                    clientRooms.Remove(client);
-                }
-                    client.Close();
-                    Console.WriteLine($"[NGẮT KẾT NỐI] Mot Client da thoat. Trong phong con lai: {clientList.Count} nguoi.");
-                }
+                RemoveClientFromRoom(client);
+                client.Close();
+                Console.WriteLine($"[NGẮT KẾT NỐI] Mot Client da thoat. Trong he thong con lai: {GetTotalClientCount()} nguoi.");
             }
+        }
 
         // Bộ nạp thông số file config.ini thủ công
         private static void DocFileConfigIni(string filePath)
@@ -198,7 +187,7 @@ namespace WhiteboardServer
             }
             Console.WriteLine($"[CONFIG.INI] Da nap cau hinh: DB={_dbPath} | IP={_serverIP} | Port={_serverPort}");
         }
-       
+        
         // Hàm 1: Khởi tạo tệp tin và tạo cấu trúc bảng chứa nét vẽ
         private static void TaoDatabaseForm()
         {
@@ -220,7 +209,7 @@ namespace WhiteboardServer
             Console.WriteLine("[SQLite] Check va khoi tao bang DrawHistory xong.");
         }
 
-        // Hàm 2:bản ghi nét vẽ khi nhận được tín hiệu qua mạng
+        // Hàm 2: ghi bản ghi nét vẽ khi nhận được tín hiệu qua mạng
         public static void LuuNetVe(string roomID ,string nguoiVe, string chuoiToaDo)
         {
             using var conn = new SqliteConnection(_dbPath);
@@ -229,7 +218,6 @@ namespace WhiteboardServer
             var sqlInsert = "INSERT INTO DrawHistory (RoomID, Username, PacketData) VALUES (@room, @user, @packet)";
 
             using var cmd = new SqliteCommand(sqlInsert, conn);
-            // Gán tham số trực tiếp để tối ưu hóa truy vấn
             cmd.Parameters.AddWithValue("@room", roomID);
             cmd.Parameters.AddWithValue("@user", nguoiVe);
             cmd.Parameters.AddWithValue("@packet", chuoiToaDo);
@@ -261,6 +249,7 @@ namespace WhiteboardServer
                 Console.WriteLine($"   => Phong: {roomID} | Record #{maSo} | User: {tenUser} | Data: {thongTinMa}");
             }
         }
+
         // Bắn ngược toàn bộ lịch sử lưu trong SQLite cho Client mới kết nối muộn
         private static void DongBoLichSuChoClientMoi(TcpClient targetClient, string roomID)
         {
@@ -269,7 +258,6 @@ namespace WhiteboardServer
                 using var conn = new SqliteConnection(_dbPath);
                 conn.Open();
 
-                // Chỉ lấy lịch sử của phòng mà Client này khai báo tham gia
                 var sqlSelect = "SELECT Username, PacketData FROM DrawHistory WHERE RoomID = @room ORDER BY Id ASC";
                 using var cmd = new SqliteCommand(sqlSelect, conn);
                 cmd.Parameters.AddWithValue("@room", roomID);
@@ -293,52 +281,115 @@ namespace WhiteboardServer
                 Console.WriteLine($"[SQLite Error] Dong bo lich su phong {roomID} that bai: {ex.Message}");
             }
         }
-        // roomChannels: roomID -> danh sách client đang ở trong phòng đó
-        private static Dictionary<string, List<TcpClient>> roomChannels = new Dictionary<string, List<TcpClient>>();
-        
+
+        // Gửi thông điệp tới tất cả client trong cùng phòng, ngoại trừ sender
         private static void BroadcastData(string roomID, string message, TcpClient sender)
         {
             byte[] data = Encoding.UTF8.GetBytes(message + "\n");
-            
-            List<TcpClient> clientsInRoom;
-            
-            lock (roomChannels)
+            List<TcpClient> roomClients;
+
+            lock (roomLock)
             {
-                if (!roomChannels.TryGetValue(roomID, out clientsInRoom) || clientsInRoom.Count == 0)
-                {
-                    Console.WriteLine($"[Broadcast] Phòng {roomID} không có client nào.");
+                if (!roomChannels.TryGetValue(roomID, out roomClients))
                     return;
-                }
-                // Copy ra list mới để gửi data bên ngoài lock (tránh block các client khác join/leave room)
-                clientsInRoom = new List<TcpClient>(clientsInRoom);
+                roomClients = new List<TcpClient>(roomClients);
             }
+
             List<TcpClient> deadClients = null;
-            foreach (TcpClient client in clientsInRoom)
+
+            foreach (TcpClient client in roomClients)
             {
-                // Không gửi lại cho chính client vừa gửi
                 if (client == sender)
                     continue;
+
                 try
                 {
                     NetworkStream stream = client.GetStream();
                     stream.Write(data, 0, data.Length);
-                    Console.WriteLine($"[Broadcast Phòng {roomID}] Đã chuyển tiếp nét vẽ.");
+                    Console.WriteLine($"[Broadcast Phong {roomID}] Da chuyen tiep tin nhan.");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[Broadcast Error - Phòng {roomID}] {ex.Message}");
+                    Console.WriteLine($"[Broadcast Error - Phong {roomID}] {ex.Message}");
                     (deadClients ??= new List<TcpClient>()).Add(client);
                 }
             }
-            // Dọn các client đã rớt kết nối khỏi room
+
+            // Dọn các client đã rớt kết nối khỏi room một cách an toàn
             if (deadClients != null)
             {
-                lock (roomChannels)
+                lock (roomLock)
                 {
-                    foreach (var dead in deadClients)
-                        clientsInRoom.Remove(dead); // hoặc roomChannels[roomID].Remove(dead);
+                    if (roomChannels.TryGetValue(roomID, out var roomList))
+                    {
+                        foreach (var dead in deadClients)
+                        {
+                            roomList.Remove(dead);
+                            clientRooms.Remove(dead);
+                        }
+                    }
                 }
             }
         }
-    }
-}
+
+        private static string CreateRoom(string creator, string roomName)
+        {
+            string roomId;
+            lock (roomLock)
+            {
+                do
+                {
+                    roomId = $"ROOM_{random.Next(1000, 9999)}";
+                } while (roomChannels.ContainsKey(roomId));
+
+                roomChannels[roomId] = new List<TcpClient>();
+            }
+            Console.WriteLine($"[ROOM] Phong moi duoc tao: {roomId} | Ten phong: {roomName} | Nguoi tao: {creator}");
+            return roomId;
+        }
+
+        private static bool AddClientToRoom(TcpClient client, string roomID)
+        {
+            lock (roomLock)
+            {
+                if (clientRooms.ContainsKey(client) && clientRooms[client] == roomID)
+                    return false;
+
+                if (clientRooms.ContainsKey(client))
+                {
+                    string oldRoom = clientRooms[client];
+                    if (roomChannels.TryGetValue(oldRoom, out var oldList))
+                    {
+                        oldList.Remove(client);
+                        Console.WriteLine($"[ROOM] Client da roi phong cu: {oldRoom}");
+                    }
+                }
+
+                clientRooms[client] = roomID;
+                if (!roomChannels.ContainsKey(roomID))
+                {
+                    roomChannels[roomID] = new List<TcpClient>();
+                }
+
+                if (!roomChannels[roomID].Contains(client))
+                {
+                    roomChannels[roomID].Add(client);
+                    Console.WriteLine($"[ROOM] Client da duoc them vao phong: {roomID}");
+                }
+            }
+
+            return true;
+        }
+
+        private static void RemoveClientFromRoom(TcpClient client)
+        {
+            lock (roomLock)
+            {
+                if (!clientRooms.TryGetValue(client, out var roomID))
+                    return;
+
+                clientRooms.Remove(client);
+                if (roomChannels.TryGetValue(roomID, out var roomList))
+                {
+                    roomList.Remove(client);
+                    Console.
