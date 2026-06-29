@@ -20,6 +20,9 @@ namespace WhiteboardServer
         private static List<TcpClient> clientList = new List<TcpClient>();
         // Quản lý xem thiết bị Client nào đang đứng ở RoomID nào để cô lập mạng
         private static Dictionary<TcpClient, string> clientRooms = new Dictionary<TcpClient, string>();
+        private static Dictionary<TcpClient, string> clientNames = new Dictionary<TcpClient, string>();
+        // logic Server cần quản lý:
+        public static Dictionary<string, List<TcpClient>> Rooms = new Dictionary<string, List<TcpClient>>();
         static void Main(string[] args)
         {
        
@@ -39,8 +42,8 @@ namespace WhiteboardServer
             // --- KHU VỰC CHẠY THỬ NGHIỆM ĐỘC LẬP TẠI NHÀ ---
             Console.WriteLine("\n--- TIEN HANH KIEM TRA DATA ---");
 
-            string duLieuTest = "DRAW;ROOM_101;150,200;155,202;#FF0000;3";
-            LuuNetVe("ROOM_101", "NguyenVanAn", duLieuTest);
+           // string duLieuTest = "DRAW;150;200;155;202;#FF0000;3;ROOM_101";
+            //LuuNetVe("ROOM_101", "NguyenVanAn", duLieuTest);
 
             DocLichSuPhong("ROOM_101");
             Console.WriteLine("--------------------------------\n");
@@ -78,6 +81,34 @@ namespace WhiteboardServer
                 Console.WriteLine($"[SERVER ERROR] {ex.Message}");
             }
         }
+        // Cập nhật danh sách User
+        private static void BroadcastUserList(string roomID)
+        {
+            List<string> usersInRoom = new List<string>();
+
+            // Lọc tìm tất cả những người đang ở trong roomID này
+            lock (clientRooms)
+            {
+                foreach (var kvp in clientRooms)
+                {
+                    if (kvp.Value == roomID)
+                    {
+                        lock (clientNames)
+                        {
+                            if (clientNames.ContainsKey(kvp.Key))
+                                usersInRoom.Add(clientNames[kvp.Key]);
+                        }
+                    }
+                }
+            }
+
+            // Ghép tên thành chuỗi: User1,User2,User3
+            string userListString = string.Join(",", usersInRoom);
+            string packetData = $"USER_LIST;{roomID};{userListString}";
+
+            // Bắn danh sách này cho toàn bộ phòng (Dùng lại hàm BroadcastData nhưng truyền sender = null để gửi cho TẤT CẢ)
+            BroadcastData(roomID, packetData, null);
+        }
 
         // Hàm HandleClient xử lý dòng dữ liệu mạng Real-time liên tục
         private static void HandleClient(TcpClient client)
@@ -93,6 +124,7 @@ namespace WhiteboardServer
             }
             try
             {
+                
                 while (true)
                 {
                     // Đọc gói tin nét vẽ truyền từ Client lên qua mạng
@@ -101,56 +133,67 @@ namespace WhiteboardServer
 
                     Console.WriteLine($"[NHẬN ĐƯỢC TỪ CLIENT] {message}");
 
-                    // Phân tích chuỗi dữ liệu (Định dạng mẫu: "TênNgườiVẽ|DữLiệuGóiTin")
                     string username = "Ẩn danh";
                     string packetData = message;
+
+                    // Phân tách nếu Client có gửi kèm tên dạng "Username|Gói_Tin"
                     if (message.Contains("|"))
                     {
                         var parts = message.Split('|');
                         username = parts[0];
                         packetData = parts[1];
                     }
-                    // LOGIC TRÍCH XUẤT ROOM ID TỰ ĐỘNG ĐỂ PHÂN LUỒNG
+
+                    // Phân tách giao thức bằng dấu chấm phẩy ;
                     string[] protocolParts = packetData.Split(';');
 
                     if (protocolParts.Length >= 2)
                     {
                         string command = protocolParts[0];
 
-                        // Xử lý các lệnh kết nối hệ thống
-                        if (command == "CONNECT" || command == "JOIN_ROOM")
+                        // ⚡ THAY ĐỔI 1: CẬP NHẬT ROOM ID CHO CÁC LỆNH VÀO PHÒNG
+                        if (command == "CONNECT" || command == "JOIN_ROOM" || command == "CREATE_ROOM")
                         {
-                            if (protocolParts.Length >= 2 && command == "CONNECT")
+                            if (protocolParts.Length >= 3)
                             {
                                 username = protocolParts[1];
+                                currentRoomID = protocolParts[2]; // Nhận mã phòng thực tế từ Client
+                            }
+                            else if (command == "CONNECT" && protocolParts.Length >= 2)
+                            {
+                                username = protocolParts[1];
+                                currentRoomID = "ROOM001";
                             }
 
-                            // Nếu gói tin có chỉ định Room rõ ràng thì cập nhật
-                            if (command == "JOIN_ROOM" && protocolParts.Length >= 3)
-                            {
-                                currentRoomID = protocolParts[2];
-                            }
-                            else
-                            {
-                                currentRoomID = "ROOM001"; // Mặc định khớp với Client
-                            }
+                            // Lưu/Cập nhật thông tin phòng của Client vào Dictionary
+                            lock (clientRooms) { clientRooms[client] = currentRoomID; }
+                            lock (clientNames) { clientNames[client] = username; }
 
-                            lock (clientRooms)
-                            {
-                                clientRooms[client] = currentRoomID;
-                            }
+                            Console.WriteLine($"[HỆ THỐNG] Thành viên '{username}' đã kết nối vào phòng: {currentRoomID}");
 
-                            Console.WriteLine($"[HỆ THỐNG] Người dùng '{username}' đã vào Phòng: {currentRoomID}");
+                            // Đồng bộ lịch sử phòng cũ cho người mới vào
                             DongBoLichSuChoClientMoi(client, currentRoomID);
+
+                            // Cập nhật danh sách User hiển thị trên UI cho cả phòng nhìn thấy nhau
+                            BroadcastUserList(currentRoomID);
                             continue;
                         }
                         else if (command == "CLEAR_CANVAS" || command == "USER_LIST")
                         {
                             currentRoomID = protocolParts[1];
                         }
+                        // ⚡ THAY ĐỔI 2: TRÍCH XUẤT ROOM ID TỪ GÓI VẼ "DRAW"
+                        else if (command == "DRAW")
+                        {
+                            // Vị trí cuối cùng của mảng chính là Room ID được Client đính kèm theo nét vẽ
+                            currentRoomID = protocolParts[protocolParts.Length - 1];
+
+                            // Cập nhật lại bộ nhớ tạm thời của Server để chắc chắn không bị lệch phòng khi truyền phát
+                            lock (clientRooms) { clientRooms[client] = currentRoomID; }
+                        }
                     }
 
-                    // Hành động 1: Lưu nét vẽ vào đúng phòng hiện tại
+                    // Hành động 1: Lưu nét vẽ vào đúng phòng hiện tại (SQLite)
                     if (packetData.StartsWith("DRAW"))
                     {
                         LuuNetVe(currentRoomID, username, packetData);

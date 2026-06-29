@@ -18,7 +18,7 @@ namespace WhiteboardClient
             });
 
             // Mở giao diện bảng vẽ
-            Application.Run(new Form1());
+            Application.Run(new LoginForm());
         }
     }
 }

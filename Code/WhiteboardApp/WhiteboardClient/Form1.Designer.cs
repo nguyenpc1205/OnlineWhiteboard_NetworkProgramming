@@ -33,7 +33,6 @@
             this.btnLogout = new System.Windows.Forms.Button();
             this.pnlUser = new System.Windows.Forms.Panel();
             this.lblUserInfo = new System.Windows.Forms.Label();
-            this.lblUserAvatar = new System.Windows.Forms.Label();
             this.lblRoomName = new System.Windows.Forms.Label();
             this.panelDivider = new System.Windows.Forms.Panel();
             this.btnJoinRoom = new System.Windows.Forms.Button();
@@ -44,6 +43,9 @@
             this.pnlRight = new System.Windows.Forms.Panel();
             this.flpOnlineUsers = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlLeftTools = new System.Windows.Forms.Panel();
+            this.button3 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.grpActions = new System.Windows.Forms.GroupBox();
             this.btnSaveImage = new System.Windows.Forms.Button();
             this.btnClearAll = new System.Windows.Forms.Button();
@@ -191,7 +193,6 @@
             // pnlUser
             // 
             this.pnlUser.Controls.Add(this.lblUserInfo);
-            this.pnlUser.Controls.Add(this.lblUserAvatar);
             this.pnlUser.Dock = System.Windows.Forms.DockStyle.Right;
             this.pnlUser.Location = new System.Drawing.Point(1399, 8);
             this.pnlUser.Name = "pnlUser";
@@ -206,17 +207,7 @@
             this.lblUserInfo.Size = new System.Drawing.Size(110, 20);
             this.lblUserInfo.TabIndex = 1;
             this.lblUserInfo.Text = "Nguyễn Văn An";
-            // 
-            // lblUserAvatar
-            // 
-            this.lblUserAvatar.BackColor = System.Drawing.Color.Crimson;
-            this.lblUserAvatar.ForeColor = System.Drawing.Color.White;
-            this.lblUserAvatar.Location = new System.Drawing.Point(3, 2);
-            this.lblUserAvatar.Name = "lblUserAvatar";
-            this.lblUserAvatar.Size = new System.Drawing.Size(23, 23);
-            this.lblUserAvatar.TabIndex = 0;
-            this.lblUserAvatar.Text = "N";
-            this.lblUserAvatar.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblUserInfo.Click += new System.EventHandler(this.lblUserInfo_Click);
             // 
             // lblRoomName
             // 
@@ -230,6 +221,7 @@
             this.lblRoomName.Size = new System.Drawing.Size(180, 25);
             this.lblRoomName.TabIndex = 4;
             this.lblRoomName.Text = "Room: Phòng Vẽ Chính";
+            this.lblRoomName.Click += new System.EventHandler(this.lblRoomName_Click);
             // 
             // panelDivider
             // 
@@ -283,12 +275,14 @@
             // 
             // pnlCanvas
             // 
+            this.pnlCanvas.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlCanvas.BackColor = System.Drawing.Color.White;
             this.pnlCanvas.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlCanvas.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlCanvas.Location = new System.Drawing.Point(10, 0);
+            this.pnlCanvas.Location = new System.Drawing.Point(0, 0);
             this.pnlCanvas.Name = "pnlCanvas";
-            this.pnlCanvas.Size = new System.Drawing.Size(1161, 642);
+            this.pnlCanvas.Size = new System.Drawing.Size(1175, 640);
             this.pnlCanvas.TabIndex = 0;
             this.pnlCanvas.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlCanvas_Paint);
             // 
@@ -315,6 +309,9 @@
             // 
             // pnlLeftTools
             // 
+            this.pnlLeftTools.Controls.Add(this.button3);
+            this.pnlLeftTools.Controls.Add(this.button2);
+            this.pnlLeftTools.Controls.Add(this.button1);
             this.pnlLeftTools.Controls.Add(this.grpActions);
             this.pnlLeftTools.Controls.Add(this.grpProperties);
             this.pnlLeftTools.Controls.Add(this.grpDrawingTools);
@@ -323,6 +320,36 @@
             this.pnlLeftTools.Name = "pnlLeftTools";
             this.pnlLeftTools.Size = new System.Drawing.Size(140, 642);
             this.pnlLeftTools.TabIndex = 0;
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(10, 510);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(120, 40);
+            this.button3.TabIndex = 5;
+            this.button3.Text = "⭕ Tròn";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(10, 464);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(120, 40);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "🔲 Vuông";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(10, 413);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(120, 45);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "🖋️ Thẳng";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // grpActions
             // 
@@ -333,16 +360,15 @@
             this.grpActions.Location = new System.Drawing.Point(0, 255);
             this.grpActions.Name = "grpActions";
             this.grpActions.Padding = new System.Windows.Forms.Padding(10);
-            this.grpActions.Size = new System.Drawing.Size(140, 110);
+            this.grpActions.Size = new System.Drawing.Size(140, 123);
             this.grpActions.TabIndex = 2;
             this.grpActions.TabStop = false;
             this.grpActions.Text = "Actions";
             // 
             // btnSaveImage
             // 
-            this.btnSaveImage.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnSaveImage.ForeColor = System.Drawing.Color.Black;
-            this.btnSaveImage.Location = new System.Drawing.Point(10, 60);
+            this.btnSaveImage.Location = new System.Drawing.Point(7, 33);
             this.btnSaveImage.Name = "btnSaveImage";
             this.btnSaveImage.Size = new System.Drawing.Size(120, 30);
             this.btnSaveImage.TabIndex = 1;
@@ -352,9 +378,8 @@
             // 
             // btnClearAll
             // 
-            this.btnClearAll.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnClearAll.ForeColor = System.Drawing.Color.Black;
-            this.btnClearAll.Location = new System.Drawing.Point(10, 30);
+            this.btnClearAll.Location = new System.Drawing.Point(10, 66);
             this.btnClearAll.Name = "btnClearAll";
             this.btnClearAll.Size = new System.Drawing.Size(120, 30);
             this.btnClearAll.TabIndex = 0;
@@ -388,6 +413,7 @@
             this.btnColor1.Size = new System.Drawing.Size(35, 25);
             this.btnColor1.TabIndex = 1;
             this.btnColor1.UseVisualStyleBackColor = false;
+            this.btnColor1.Click += new System.EventHandler(this.btnColor1_Click);
             // 
             // btnColor2
             // 
@@ -398,6 +424,7 @@
             this.btnColor2.Size = new System.Drawing.Size(78, 25);
             this.btnColor2.TabIndex = 2;
             this.btnColor2.UseVisualStyleBackColor = false;
+            this.btnColor2.Click += new System.EventHandler(this.btnColor2_Click);
             // 
             // lblBrushSizeText
             // 
@@ -410,6 +437,7 @@
             this.lblBrushSizeText.Size = new System.Drawing.Size(111, 24);
             this.lblBrushSizeText.TabIndex = 4;
             this.lblBrushSizeText.Text = "Brush Size: 3px";
+            this.lblBrushSizeText.Click += new System.EventHandler(this.lblBrushSizeText_Click);
             // 
             // trackBrushSize
             // 
@@ -423,6 +451,7 @@
             this.trackBrushSize.TabIndex = 3;
             this.trackBrushSize.TickStyle = System.Windows.Forms.TickStyle.None;
             this.trackBrushSize.Value = 3;
+            this.trackBrushSize.Scroll += new System.EventHandler(this.trackBrushSize_Scroll);
             // 
             // lblColorLabel
             // 
@@ -459,6 +488,7 @@
             this.btnEraser.Text = "⌫ Eraser";
             this.btnEraser.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnEraser.UseVisualStyleBackColor = true;
+            this.btnEraser.Click += new System.EventHandler(this.btnEraser_Click);
             // 
             // btnPen
             // 
@@ -530,7 +560,6 @@
         private System.Windows.Forms.Label lblRoomName;
         private System.Windows.Forms.Panel pnlUser;
         private System.Windows.Forms.Label lblUserInfo;
-        private System.Windows.Forms.Label lblUserAvatar;
         private System.Windows.Forms.Button btnLogout;
         private System.Windows.Forms.Panel pnlMain;
         private System.Windows.Forms.Panel pnlLeftTools;
@@ -550,5 +579,8 @@
         private System.Windows.Forms.GroupBox grpActions;
         private System.Windows.Forms.Button btnClearAll;
         private System.Windows.Forms.Button btnSaveImage;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button1;
     }
 }
