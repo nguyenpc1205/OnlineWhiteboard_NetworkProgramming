@@ -14,17 +14,12 @@ namespace WhiteboardClient
         // Các biến phục vụ chức năng xử lý đồ họa nét vẽ
         private enum DrawTool { Pen, Line, Rectangle, Circle, Eraser }
         private DrawTool currentTool = DrawTool.Pen; // Mặc định ban đầu là bút vẽ tự do
-
         // Biến phục vụ tính năng kéo thả hình học
         private Point shapeStartPoint;
         private Point shapeEndPoint;
         private bool isDrawingShape = false;
-
         // Khai báo thêm các nút bấm chọn hình học hiển thị trên thanh công cụ
         private Button btnToolPen;
-       
-       
-
         // Bộ nhớ đệm đồ họa ẩn giúp hình vẽ mượt mà, không bị nhấp nháy màn hình
         private Bitmap canvasBitmap;
         private Graphics bitmapGraphics;
@@ -106,84 +101,95 @@ namespace WhiteboardClient
                 bitmapGraphics = Graphics.FromImage(canvasBitmap);
                 bitmapGraphics.SmoothingMode = SmoothingMode.AntiAlias;
                 bitmapGraphics.Clear(Color.White);
-
                 trackBrushSize.Value = (int)brushSize; // Đưa thanh trượt về đúng mức size mặc định (4f)
                 lblBrushSizeText.Text = brushSize.ToString();
                 pnlCanvas.Invalidate();
             }
+            if (flpOnlineUsers != null)
+            {
+                flpOnlineUsers.AutoScroll = true;
+            }
         }
 
         // --- PHÂN HỆ 1: QUẢN LÝ GIAO DIỆN THÀNH VIÊN ONLINE ---
-        private void LoadMockUsers()
+      
+
+        private void CapNhatDanhSachThanhVien(string[] danhSachUsers)
         {
-            AddUser("Nguyễn Văn An", Color.Crimson);
-            AddUser("Trần Thị Bình", Color.LimeGreen);
-            AddUser("Lê Minh Cường", Color.Blue);
-            AddUser("Phạm Thu Dung", Color.Magenta);
-        }
-
-        private void AddUser(string name, Color avatarColor)
-        {
-            Panel pnlUser = new Panel();
-            pnlUser.Width = flpOnlineUsers.Width - 15;
-            pnlUser.Height = 50;
-            pnlUser.Margin = new Padding(0, 0, 0, 5);
-            pnlUser.BackColor = Color.White;
-
-            Panel pnlBorder = new Panel();
-            pnlBorder.Height = 1;
-            pnlBorder.Dock = DockStyle.Bottom;
-            pnlBorder.BackColor = Color.LightGray;
-            pnlUser.Controls.Add(pnlBorder);
-
-            Label lblAvatar = new Label();
-            lblAvatar.Text = name[0].ToString().ToUpper();
-            lblAvatar.Size = new Size(30, 30);
-            lblAvatar.Location = new Point(5, 10);
-            lblAvatar.BackColor = avatarColor;
-            lblAvatar.ForeColor = Color.White;
-            lblAvatar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            lblAvatar.TextAlign = ContentAlignment.MiddleCenter;
-            pnlUser.Controls.Add(lblAvatar);
-
-            Label lblName = new Label();
-            lblName.Text = name;
-            lblName.Location = new Point(45, 8);
-            lblName.AutoSize = true;
-            lblName.Font = new Font("Segoe UI", 9F);
-            pnlUser.Controls.Add(lblName);
-
-            Label lblStatus = new Label();
-            lblStatus.Text = " ■  Online";
-            lblStatus.Location = new Point(45, 25);
-            lblStatus.AutoSize = true;
-            lblStatus.ForeColor = Color.LimeGreen;
-            lblStatus.Font = new Font("Segoe UI", 8F);
-            pnlUser.Controls.Add(lblStatus);
-
-            Label lblColorBadge = new Label();
-            lblColorBadge.Size = new Size(15, 15);
-            lblColorBadge.Location = new Point(170, 17);
-            lblColorBadge.BackColor = avatarColor;
-            pnlUser.Controls.Add(lblColorBadge);
-
-            flpOnlineUsers.Controls.Add(pnlUser);
-        }
-
-        private void UpdateUserList(string[] users)
-        {
-            flpOnlineUsers.Controls.Clear();
-            Color[] colors = { Color.Crimson, Color.Blue, Color.Green, Color.Orange, Color.Purple };
-            int index = 0;
-
-            foreach (string user in users)
+            // Đảm bảo code chạy an toàn trên Luồng Giao Diện chính (UI Thread)
+            if (this.InvokeRequired)
             {
-                if (!string.IsNullOrWhiteSpace(user))
-                {
-                    AddUser(user.Trim(), colors[index % colors.Length]);
-                    index++;
-                }
+                this.BeginInvoke((MethodInvoker)delegate { CapNhatDanhSachThanhVien(danhSachUsers); });
+                return;
             }
+
+            // Đóng băng giao diện tạm thời để không bị nhấp nháy màn hình khi tải danh sách
+            flpOnlineUsers.SuspendLayout();
+            flpOnlineUsers.Controls.Clear(); // Xóa sạch dữ liệu cũ để nạp mới hoàn toàn
+
+            // Tự động xuất hiện thanh cuộn dọc khi số lượng người trong phòng quá đông
+            flpOnlineUsers.AutoScroll = true;
+
+            // Mảng màu sắc ngẫu nhiên để tô điểm cho Avatar các thành viên
+            Color[] mauAvatar = { Color.Crimson, Color.DodgerBlue, Color.ForestGreen, Color.Orange, Color.Purple };
+            int count = 0;
+
+            foreach (string user in danhSachUsers)
+            {
+                // Làm sạch tên (loại bỏ khoảng trắng thừa hoặc ký tự xuống dòng từ Server truyền về)
+                string tenHopLe = user.Replace("\r", "").Replace("\n", "").Trim();
+                if (string.IsNullOrWhiteSpace(tenHopLe)) continue;
+
+                // 1. Tạo khung ô chứa cho từng thành viên (Panel con)
+                Panel pnlDong = new Panel();
+                pnlDong.Width = flpOnlineUsers.Width - 25; // Trừ hao 25px để không bị che khuất khi có thanh cuộn
+                pnlDong.Height = 50;
+                pnlDong.Margin = new Padding(3, 3, 3, 5);
+                pnlDong.BackColor = Color.White;
+
+                // 2. Tạo hình vuông chứa chữ cái đầu làm Avatar đại diện
+                Label lblAvatar = new Label();
+                lblAvatar.Text = tenHopLe[0].ToString().ToUpper(); // Lấy chữ cái đầu tiên của tên
+                lblAvatar.Size = new Size(32, 32);
+                lblAvatar.Location = new Point(8, 9);
+                lblAvatar.BackColor = mauAvatar[count % mauAvatar.Length]; // Đổi màu ngẫu nhiên
+                lblAvatar.ForeColor = Color.White;
+                lblAvatar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+                lblAvatar.TextAlign = ContentAlignment.MiddleCenter;
+                pnlDong.Controls.Add(lblAvatar);
+
+                // 3. Tạo chữ hiển thị Tên Thành Viên
+                Label lblName = new Label();
+                lblName.Text = tenHopLe;
+                lblName.Location = new Point(48, 8);
+                lblName.AutoSize = true;
+                lblName.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+                pnlDong.Controls.Add(lblName);
+
+                // 4. Tạo chấm xanh hiển thị trạng thái Online
+                Label lblStatus = new Label();
+                lblStatus.Text = "●  Online";
+                lblStatus.Location = new Point(48, 26);
+                lblStatus.AutoSize = true;
+                lblStatus.ForeColor = Color.LimeGreen;
+                lblStatus.Font = new Font("Segoe UI", 8F);
+                pnlDong.Controls.Add(lblStatus);
+
+                // 5. Thêm đường kẻ mờ phân tách mượt mà giữa các thành viên
+                Panel pnlLine = new Panel();
+                pnlLine.Height = 1;
+                pnlLine.Dock = DockStyle.Bottom;
+                pnlLine.BackColor = Color.FromArgb(235, 235, 235);
+                pnlDong.Controls.Add(pnlLine);
+
+                // Nạp ô thành viên vừa tạo hoàn chỉnh vào trong danh sách flpOnlineUsers
+                flpOnlineUsers.Controls.Add(pnlDong);
+                count++;
+            }
+
+            // Mở khóa giao diện và bắt buộc danh sách vẽ lại ngay lập tức lên màn hình
+            flpOnlineUsers.ResumeLayout();
+            flpOnlineUsers.Refresh();
         }
 
         // --- PHÂN HỆ 2: KHỞI TẠO VÀ XỬ LÝ SỰ KIỆN BẢNG VẼ ---
@@ -191,7 +197,6 @@ namespace WhiteboardClient
         {
             pnlCanvas.Dock = DockStyle.Fill;
             pnlCanvas.BackColor = Color.White;
-
             pnlCanvas.MouseDown += pnlCanvas_MouseDown;
             pnlCanvas.MouseMove += pnlCanvas_MouseMove;
             pnlCanvas.MouseUp += pnlCanvas_MouseUp;
@@ -245,7 +250,6 @@ namespace WhiteboardClient
             if (pnlCanvas.Width > 0 && pnlCanvas.Height > 0)
             {
                 Bitmap oldBitmap = canvasBitmap;
-
                 canvasBitmap = new Bitmap(pnlCanvas.Width, pnlCanvas.Height);
                 bitmapGraphics = Graphics.FromImage(canvasBitmap);
                 bitmapGraphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -304,7 +308,7 @@ namespace WhiteboardClient
         }
 
 
-        private void pnlCanvas_MouseUp(object sender, MouseEventArgs e)
+     private void pnlCanvas_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -392,8 +396,7 @@ namespace WhiteboardClient
         private void HandleNetworkData(string data)
         {
             if (string.IsNullOrWhiteSpace(data)) return;
-
-            this.Invoke((MethodInvoker)delegate
+           
             {
                 try
                 {
@@ -408,7 +411,19 @@ namespace WhiteboardClient
 
                     string[] parts = cleanData.Split(';');
                     if (parts.Length == 0) return;
+                    // XỬ LÝ GÓI TIN DANH SÁCH THÀNH VIÊN
+                    if (parts[0] == "USER_LIST")
+                    {
+                        if (parts.Length >= 2 && !string.IsNullOrWhiteSpace(parts[1]))
+                        {
+                            // Tách danh sách tên theo dấu phẩy từ gói mạng
+                            string[] onlineUsers = parts[1].Split(',');
 
+                            // SỬA DÒNG NÀY: Gọi chính xác hàm nạp danh sách trực quan vừa sửa ở trên
+                            CapNhatDanhSachThanhVien(onlineUsers);
+                        }
+                        return;
+                    }
                     // Kiểm tra lệnh DRAW sau khi đã làm sạch chuỗi
                     if (parts[0] == "DRAW")
                     {
@@ -480,7 +495,7 @@ namespace WhiteboardClient
                 {
                     Console.WriteLine($"[Lỗi dựng hình mạng]: {ex.Message}");
                 }
-            });
+            };
         }
 
 
@@ -610,17 +625,17 @@ namespace WhiteboardClient
             button3.BackColor = Color.LightBlue;
         }
 
-        // 8. Hàm Reset màu sắc (Đã giữ nguyên theo chuẩn Control cũ của bạn)
+        // 8. Hàm Reset màu sắc 
         private void ResetButtonColors()
         {
             // Sử dụng Color.Empty hoặc Color.FromArgb(240, 240, 240) để đưa nút về trạng thái xám ban đầu
             if (button1 != null) button1.BackColor = Color.Empty;
             if (button2 != null) button2.BackColor = Color.Empty;
             if (button3 != null) button3.BackColor = Color.Empty;
-
             if (btnPen != null) btnPen.BackColor = Color.Empty;
             if (btnEraser != null) btnEraser.BackColor = Color.Empty;
         }
+
 
         private void trackBrushSize_Scroll(object sender, EventArgs e)
         {
@@ -632,6 +647,11 @@ namespace WhiteboardClient
             brushSize = (float)trackBrushSize.Value;
 
             lblBrushSizeText.Text = brushSize.ToString();
+        }
+
+        private void flpOnlineUsers_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
     }

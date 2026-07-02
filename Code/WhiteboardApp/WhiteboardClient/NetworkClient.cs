@@ -17,7 +17,7 @@ namespace WhiteboardClient
 
         public static async Task StartClientAsync()
         {
-            Console.WriteLine("=== Mạng Client - Kết nối tới 127.0.0.1:8888 ===");
+            Console.WriteLine("=== Mạng Client - Kết nối tới 10.144.154.176:8888 ===");
 
             try
             {
@@ -28,7 +28,7 @@ namespace WhiteboardClient
                 writer = new StreamWriter(networkStream) { AutoFlush = true };
                 reader = new StreamReader(networkStream);
 
-                Console.WriteLine("[INFO] Đã kết nối thành công tới 127.0.0.1:8888\n");
+                Console.WriteLine("[INFO] Đã kết nối thành công tới 10.144.154.176:8888\n");
 
                 // 2. Luồng ngầm lắng nghe dữ liệu từ Server
                 _ = Task.Run(async () =>

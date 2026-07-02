@@ -43,6 +43,7 @@
             this.pnlRight = new System.Windows.Forms.Panel();
             this.flpOnlineUsers = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlLeftTools = new System.Windows.Forms.Panel();
+            this.shape = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
@@ -58,6 +59,7 @@
             this.grpDrawingTools = new System.Windows.Forms.GroupBox();
             this.btnEraser = new System.Windows.Forms.Button();
             this.btnPen = new System.Windows.Forms.Button();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.pnlTopToolbar.SuspendLayout();
@@ -265,6 +267,7 @@
             // 
             // pnlCanvasContainer
             // 
+            this.pnlCanvasContainer.Controls.Add(this.flowLayoutPanel1);
             this.pnlCanvasContainer.Controls.Add(this.pnlCanvas);
             this.pnlCanvasContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlCanvasContainer.Location = new System.Drawing.Point(150, 10);
@@ -297,6 +300,7 @@
             // 
             // flpOnlineUsers
             // 
+            this.flpOnlineUsers.AutoScroll = true;
             this.flpOnlineUsers.BackColor = System.Drawing.Color.White;
             this.flpOnlineUsers.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.flpOnlineUsers.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -306,9 +310,12 @@
             this.flpOnlineUsers.Padding = new System.Windows.Forms.Padding(5);
             this.flpOnlineUsers.Size = new System.Drawing.Size(210, 642);
             this.flpOnlineUsers.TabIndex = 0;
+            this.flpOnlineUsers.WrapContents = false;
+            this.flpOnlineUsers.Paint += new System.Windows.Forms.PaintEventHandler(this.flpOnlineUsers_Paint);
             // 
             // pnlLeftTools
             // 
+            this.pnlLeftTools.Controls.Add(this.shape);
             this.pnlLeftTools.Controls.Add(this.button3);
             this.pnlLeftTools.Controls.Add(this.button2);
             this.pnlLeftTools.Controls.Add(this.button1);
@@ -320,6 +327,15 @@
             this.pnlLeftTools.Name = "pnlLeftTools";
             this.pnlLeftTools.Size = new System.Drawing.Size(140, 642);
             this.pnlLeftTools.TabIndex = 0;
+            // 
+            // shape
+            // 
+            this.shape.AutoSize = true;
+            this.shape.Location = new System.Drawing.Point(38, 381);
+            this.shape.Name = "shape";
+            this.shape.Size = new System.Drawing.Size(50, 20);
+            this.shape.TabIndex = 0;
+            this.shape.Text = "Shape\r\n";
             // 
             // button3
             // 
@@ -503,6 +519,13 @@
             this.btnPen.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnPen.UseVisualStyleBackColor = false;
             // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(1181, 0);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(203, 634);
+            this.flowLayoutPanel1.TabIndex = 0;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -530,6 +553,7 @@
             this.pnlCanvasContainer.ResumeLayout(false);
             this.pnlRight.ResumeLayout(false);
             this.pnlLeftTools.ResumeLayout(false);
+            this.pnlLeftTools.PerformLayout();
             this.grpActions.ResumeLayout(false);
             this.grpProperties.ResumeLayout(false);
             this.grpProperties.PerformLayout();
@@ -582,5 +606,7 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label shape;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
     }
 }
