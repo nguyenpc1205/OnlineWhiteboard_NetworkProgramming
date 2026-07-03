@@ -341,7 +341,7 @@ namespace WhiteboardClient
             }
         }
 
-        // ⭐ ĐÃ SỬA: Hàm Paint hiển thị đệm Bitmap và vẽ bóng nét đứt xem trước hình học
+        // Hàm Paint hiển thị đệm Bitmap và vẽ bóng nét đứt xem trước hình học
         private void pnlCanvas_Paint(object sender, PaintEventArgs e)
         {
             if (canvasBitmap != null)
@@ -498,7 +498,7 @@ namespace WhiteboardClient
             };
         }
 
-
+ // Logic khi bấm nút Xóa Toàn Bộ (Clear All)
         private void BtnClearAll_Click(object sender, EventArgs e)
         {
             if (bitmapGraphics != null)
@@ -517,7 +517,7 @@ namespace WhiteboardClient
                 catch (Exception ex) { Console.WriteLine($"[Lỗi xóa mạng]: {ex.Message}"); }
             }
         }
-
+ // Logic khi bấm nút Lưu Ảnh (Save Image)
         private void BtnSaveImage_Click(object sender, EventArgs e)
         {
             if (canvasBitmap == null) return;
@@ -559,7 +559,7 @@ namespace WhiteboardClient
         {
             MessageBox.Show($"Tài khoản: {lblUserInfo.Text}\nTrạng thái: Đang tham gia phòng vẽ", "Thông tin người dùng", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-
+//  Click nút chọn công cụ Tẩy xóa (Eraser).
         private void btnEraser_Click(object sender, EventArgs e)
         {
             currentTool = DrawTool.Eraser;
@@ -581,7 +581,6 @@ namespace WhiteboardClient
                     currentBrushColor = colorDialog.Color;
                     btnColor1.BackColor = currentBrushColor;
 
-                    // ĐÃ SỬA: Thay vì gọi SwitchTool lỗi, ta kích hoạt trực tiếp sự kiện click của btnPen
                     if (currentTool == DrawTool.Eraser)
                     {
                         btnPen_Click(btnPen, EventArgs.Empty);
@@ -593,7 +592,6 @@ namespace WhiteboardClient
         // 4. Nút hiển thị màu hiện tại
         private void btnColor1_Click(object sender, EventArgs e)
         {
-            // ĐÃ SỬA: Khi bấm vào ô màu, tự động đưa công cụ về Pen chuẩn hóa thông qua hàm click của nó
             btnPen_Click(btnPen, EventArgs.Empty);
             btnColor1.BackColor = currentBrushColor;
         }
@@ -636,7 +634,7 @@ namespace WhiteboardClient
             if (btnEraser != null) btnEraser.BackColor = Color.Empty;
         }
 
-
+// thanh điều chỉnh kích cỡ nét vẽ , tẩy , hình học
         private void trackBrushSize_Scroll(object sender, EventArgs e)
         {
             brushSize = (float)trackBrushSize.Value;
