@@ -39,6 +39,7 @@
             this.btnNewRoom = new System.Windows.Forms.Button();
             this.pnlMain = new System.Windows.Forms.Panel();
             this.pnlCanvasContainer = new System.Windows.Forms.Panel();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlCanvas = new System.Windows.Forms.Panel();
             this.pnlRight = new System.Windows.Forms.Panel();
             this.flpOnlineUsers = new System.Windows.Forms.FlowLayoutPanel();
@@ -59,7 +60,6 @@
             this.grpDrawingTools = new System.Windows.Forms.GroupBox();
             this.btnEraser = new System.Windows.Forms.Button();
             this.btnPen = new System.Windows.Forms.Button();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.pnlTopToolbar.SuspendLayout();
@@ -275,6 +275,13 @@
             this.pnlCanvasContainer.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.pnlCanvasContainer.Size = new System.Drawing.Size(1181, 642);
             this.pnlCanvasContainer.TabIndex = 2;
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(1181, 0);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(203, 634);
+            this.flowLayoutPanel1.TabIndex = 0;
             // 
             // pnlCanvas
             // 
@@ -518,13 +525,6 @@
             this.btnPen.Text = "✎ Pen";
             this.btnPen.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnPen.UseVisualStyleBackColor = false;
-            // 
-            // flowLayoutPanel1
-            // 
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(1181, 0);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(203, 634);
-            this.flowLayoutPanel1.TabIndex = 0;
             // 
             // Form1
             // 
