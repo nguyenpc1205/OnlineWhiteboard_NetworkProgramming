@@ -23,9 +23,9 @@ namespace WhiteboardServer
         private static Dictionary<TcpClient, string> clientNames = new Dictionary<TcpClient, string>();
         // logic Server cần quản lý:
         public static Dictionary<string, List<TcpClient>> Rooms = new Dictionary<string, List<TcpClient>>();
+
         static void Main(string[] args)
         {
-       
             // Thiết lập mã hóa UTF-8 cho console để hiển thị tiếng Việt đúng cách
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.InputEncoding = System.Text.Encoding.UTF8;
@@ -37,14 +37,11 @@ namespace WhiteboardServer
             // Tu dong kiem tra va tao bang du lieu ban dau
             TaoDatabaseForm();
 
-            DatabaseManager.InitializeDatabase();
+            // Khởi tạo Database nếu bạn có class DatabaseManager riêng
+            // DatabaseManager.InitializeDatabase(); 
 
             // --- KHU VỰC CHẠY THỬ NGHIỆM ĐỘC LẬP TẠI NHÀ ---
             Console.WriteLine("\n--- TIEN HANH KIEM TRA DATA ---");
-
-           // string duLieuTest = "DRAW;150;200;155;202;#FF0000;3;ROOM_101";
-            //LuuNetVe("ROOM_101", "NguyenVanAn", duLieuTest);
-
             DocLichSuPhong("ROOM_101");
             Console.WriteLine("--------------------------------\n");
 
@@ -81,6 +78,7 @@ namespace WhiteboardServer
                 Console.WriteLine($"[SERVER ERROR] {ex.Message}");
             }
         }
+
         // Cập nhật danh sách User
         private static void BroadcastUserList(string roomID)
         {
@@ -104,7 +102,9 @@ namespace WhiteboardServer
 
             // Ghép tên thành chuỗi: User1,User2,User3
             string userListString = string.Join(",", usersInRoom);
-            string packetData = $"USER_LIST;{roomID};{userListString}";
+
+            // ⚡ ĐÃ SỬA LỖI: Cấu trúc gọi về Client chỉ còn USER_LIST;DanhSachTen
+            string packetData = $"USER_LIST;{userListString}";
 
             // Bắn danh sách này cho toàn bộ phòng (Dùng lại hàm BroadcastData nhưng truyền sender = null để gửi cho TẤT CẢ)
             BroadcastData(roomID, packetData, null);
@@ -118,13 +118,12 @@ namespace WhiteboardServer
 
             string currentRoomID = "ROOM001";
             lock (clientRooms)
-
             {
                 clientRooms[client] = currentRoomID;
             }
+
             try
             {
-                
                 while (true)
                 {
                     // Đọc gói tin nét vẽ truyền từ Client lên qua mạng
@@ -151,7 +150,7 @@ namespace WhiteboardServer
                     {
                         string command = protocolParts[0];
 
-                        // ⚡ THAY ĐỔI 1: CẬP NHẬT ROOM ID CHO CÁC LỆNH VÀO PHÒNG
+                        // CẬP NHẬT ROOM ID CHO CÁC LỆNH VÀO PHÒNG
                         if (command == "CONNECT" || command == "JOIN_ROOM" || command == "CREATE_ROOM")
                         {
                             if (protocolParts.Length >= 3)
@@ -182,7 +181,7 @@ namespace WhiteboardServer
                         {
                             currentRoomID = protocolParts[1];
                         }
-                        // ⚡ THAY ĐỔI 2: TRÍCH XUẤT ROOM ID TỪ GÓI VẼ "DRAW"
+                        // TRÍCH XUẤT ROOM ID TỪ GÓI VẼ "DRAW"
                         else if (command == "DRAW")
                         {
                             // Vị trí cuối cùng của mảng chính là Room ID được Client đính kèm theo nét vẽ
@@ -211,8 +210,18 @@ namespace WhiteboardServer
             {
                 lock (clientList) { clientList.Remove(client); }
                 lock (clientRooms) { clientRooms.Remove(client); }
+
+                // ⚡ ĐÃ SỬA LỖI: Xóa tên người đó khỏi danh sách để UI không bị lưu lại
+                lock (clientNames) { clientNames.Remove(client); }
+
                 client.Close();
                 Console.WriteLine($"[NGẮT KẾT NỐI] Một Client đã thoát. Trong phòng còn lại: {clientList.Count} người.");
+
+                // ⚡ ĐÃ SỬA LỖI: Gửi tín hiệu điểm danh lại cho phòng
+                if (!string.IsNullOrEmpty(currentRoomID))
+                {
+                    BroadcastUserList(currentRoomID);
+                }
             }
         }
 
@@ -245,7 +254,7 @@ namespace WhiteboardServer
             }
             Console.WriteLine($"[CONFIG.INI] Da nap cau hinh: DB={_dbPath} | IP={_serverIP} | Port={_serverPort}");
         }
-       
+
         // Hàm 1: Khởi tạo tệp tin và tạo cấu trúc bảng chứa nét vẽ
         private static void TaoDatabaseForm()
         {
@@ -263,12 +272,12 @@ namespace WhiteboardServer
 
             using var cmd = new SqliteCommand(sqlCheckTable, conn);
             cmd.ExecuteNonQuery();
-            
+
             Console.WriteLine("[SQLite] Check va khoi tao bang DrawHistory xong.");
         }
 
         // Hàm 2:bản ghi nét vẽ khi nhận được tín hiệu qua mạng
-        public static void LuuNetVe(string roomID ,string nguoiVe, string chuoiToaDo)
+        public static void LuuNetVe(string roomID, string nguoiVe, string chuoiToaDo)
         {
             using var conn = new SqliteConnection(_dbPath);
             conn.Open();
@@ -280,7 +289,7 @@ namespace WhiteboardServer
             cmd.Parameters.AddWithValue("@room", roomID);
             cmd.Parameters.AddWithValue("@user", nguoiVe);
             cmd.Parameters.AddWithValue("@packet", chuoiToaDo);
-            
+
             cmd.ExecuteNonQuery();
             Console.WriteLine($"[SQLite] Da ghi net ve cua: {nguoiVe} vao Phong: {roomID}");
         }
@@ -289,16 +298,16 @@ namespace WhiteboardServer
         public static void DocLichSuPhong(string roomID)
         {
             Console.WriteLine($"[SQLite] Lay danh sach lich su cua phong [{roomID}] tu file db...");
-            
+
             using var conn = new SqliteConnection(_dbPath);
             conn.Open();
 
             var sqlSelect = "SELECT Id, Username, PacketData FROM DrawHistory WHERE RoomID = @room ORDER BY Id ASC";
-            
+
             using var cmd = new SqliteCommand(sqlSelect, conn);
             cmd.Parameters.AddWithValue("@room", roomID);
             using var reader = cmd.ExecuteReader();
-            
+
             while (reader.Read())
             {
                 int maSo = reader.GetInt32(0);
@@ -308,6 +317,7 @@ namespace WhiteboardServer
                 Console.WriteLine($"   => Phong: {roomID} | Record #{maSo} | User: {tenUser} | Data: {thongTinMa}");
             }
         }
+
         // Bắn ngược toàn bộ lịch sử lưu trong SQLite cho Client mới kết nối muộn
         private static void DongBoLichSuChoClientMoi(TcpClient targetClient, string roomID)
         {
