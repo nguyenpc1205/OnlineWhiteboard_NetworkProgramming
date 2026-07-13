@@ -8,6 +8,7 @@ namespace WhiteboardClient
 {
     public partial class Form1 : Form
     {
+        // KHAI BÁO CÁC BIẾN TRẠNG THÁI VÀ CẤU HÌNH
         private enum DrawTool { Pen, Line, Rectangle, Circle, Eraser }
         private DrawTool currentTool = DrawTool.Pen;
 
@@ -20,6 +21,7 @@ namespace WhiteboardClient
 
         private bool isDrawing = false;
         private Point lastPoint;
+        private Point lastSentPoint; // Lưu điểm cuối cùng thực sự gửi qua mạng để tính khoảng cách lọc (Throttle)
         private Color currentBrushColor = Color.Black;
         private float brushSize = 3f;
         private string currentRoomId = "";
@@ -27,36 +29,47 @@ namespace WhiteboardClient
 
         private System.Windows.Forms.Timer syncTimer;
 
+        /// <summary>
+        /// Hàm khởi tạo Form mặc định (không tham số).
+        /// </summary>
         public Form1()
         {
             InitializeComponent();
             InitializepnlCanvas();
         }
 
+        /// <summary>
+        /// Hàm khởi tạo Form có tham số khi User đăng nhập.
+        /// </summary>
         public Form1(string username, string roomID, string actionType)
         {
             InitializeComponent();
 
+            // Đăng ký sự kiện Click cho các nút chọn công cụ vẽ
             if (btnPen != null) btnPen.Click += btnPen_Click;
             if (btnEraser != null) btnEraser.Click += btnEraser_Click;
             if (button1 != null) button1.Click += button1_Click;
             if (button2 != null) button2.Click += button2_Click;
             if (button3 != null) button3.Click += button3_Click;
 
+            // Lưu thông tin người dùng và phòng
             this.currentUserName = username;
             this.currentRoomId = roomID;
             btnColor1.BackColor = Color.Black;
             lblRoomName.Text = $"PHÒNG VẼ: {roomID}";
             lblUserInfo.Text = username;
 
+            // Đăng ký sự kiện cho nút Clear All và Save Image
             btnClearAll.Click += BtnClearAll_Click;
             btnSaveImage.Click += BtnSaveImage_Click;
 
+            // Đưa các nút chức năng lên lớp trên cùng để tránh bị panel che khuất
             btnClearAll.BringToFront();
             btnSaveImage.BringToFront();
 
             InitializepnlCanvas();
 
+            // Làm sạch event cũ và đăng ký nhận dữ liệu từ luồng mạng ngầm
             NetworkClient.OnDataReceived -= HandleNetworkData;
             NetworkClient.OnDataReceived += HandleNetworkData;
 
@@ -94,15 +107,17 @@ namespace WhiteboardClient
             syncTimer.Stop();
             if (NetworkClient.tcpClient != null && NetworkClient.tcpClient.Connected)
             {
-                NetworkClient.SendMessage($"JOIN_ROOM;{currentUserName};{currentRoomId}");
+                // Thêm \n ở cuối thông điệp để kết thúc dòng rạch ròi theo hợp đồng dữ liệu
+                NetworkClient.SendMessage($"JOIN_ROOM;{currentUserName};{currentRoomId}\n");
             }
         }
 
-        // --- CƠ CHẾ NHẬN MẠNG HOÀN HẢO BAO GỒM CẢ FORMAT CŨ VÀ MỚI ---
+        // CƠ CHẾ NHẬN MẠNG
         private void HandleNetworkData(string data)
         {
             if (string.IsNullOrWhiteSpace(data)) return;
 
+            // Sử dụng BeginInvoke bất đồng bộ không chặn luồng nhận mạng ngầm
             this.BeginInvoke((MethodInvoker)delegate
             {
                 try
@@ -145,7 +160,13 @@ namespace WhiteboardClient
                                     {
                                         DrawShapeGeneric(bitmapGraphics, remoteTool, new Point(x1, y1), new Point(x2, y2), remotePen);
                                     }
-                                    pnlCanvas.Invalidate();
+
+                                    // Tối ưu UI: Chỉ làm mới vùng biên của hình vẽ thay vì Invalidate toàn bộ bảng
+                                    int x = Math.Min(x1, x2) - (int)thickness - 2;
+                                    int y = Math.Min(y1, y2) - (int)thickness - 2;
+                                    int w = Math.Abs(x1 - x2) + (int)thickness * 2 + 4;
+                                    int h = Math.Abs(y1 - y2) + (int)thickness * 2 + 4;
+                                    pnlCanvas.Invalidate(new Rectangle(x, y, w, h));
                                 }
                             }
                         }
@@ -167,7 +188,13 @@ namespace WhiteboardClient
                                     {
                                         bitmapGraphics.DrawLine(remotePen, x1, y1, x2, y2);
                                     }
-                                    pnlCanvas.Invalidate();
+
+                                    // Tối ưu UI: Chỉ làm mới vùng chữ nhật nhỏ cục bộ chứa nét vẽ tự do vừa nhận
+                                    int x = Math.Min(x1, x2) - (int)thickness - 2;
+                                    int y = Math.Min(y1, y2) - (int)thickness - 2;
+                                    int w = Math.Abs(x1 - x2) + (int)thickness * 2 + 4;
+                                    int h = Math.Abs(y1 - y2) + (int)thickness * 2 + 4;
+                                    pnlCanvas.Invalidate(new Rectangle(x, y, w, h));
                                 }
                             }
                         }
@@ -283,7 +310,7 @@ namespace WhiteboardClient
             flpOnlineUsers.ResumeLayout();
         }
 
-        // --- CÁC HÀM XỬ LÝ SỰ KIỆN CHUỘT VÀ ĐỒNG BỘ CHUẨN MỚI ---
+        // CÁC HÀM XỬ LÝ SỰ KIỆN CHUỘT VÀ ĐỒNG BỘ
         private void InitializepnlCanvas()
         {
             pnlCanvas.Dock = DockStyle.Fill;
@@ -311,6 +338,8 @@ namespace WhiteboardClient
             if (e.Button == MouseButtons.Left)
             {
                 lastPoint = e.Location;
+                lastSentPoint = e.Location; // Gán mốc điểm bắt đầu vẽ cục bộ phục vụ việc Throttle mạng
+
                 if (currentTool == DrawTool.Pen || currentTool == DrawTool.Eraser)
                 {
                     isDrawing = true; isDrawingShape = false;
@@ -345,6 +374,8 @@ namespace WhiteboardClient
         {
             if (isDrawing && bitmapGraphics != null)
             {
+                float currentSize = (currentTool == DrawTool.Eraser) ? (brushSize * 4) : brushSize;
+
                 if (currentTool == DrawTool.Pen)
                 {
                     using (Pen pen = new Pen(currentBrushColor, brushSize))
@@ -355,26 +386,41 @@ namespace WhiteboardClient
                 }
                 else if (currentTool == DrawTool.Eraser)
                 {
-                    using (Pen eraserPen = new Pen(Color.White, brushSize * 4))
+                    using (Pen eraserPen = new Pen(Color.White, currentSize))
                     {
                         eraserPen.StartCap = LineCap.Round; eraserPen.EndCap = LineCap.Round;
                         bitmapGraphics.DrawLine(eraserPen, lastPoint, e.Location);
                     }
                 }
 
-                // GỬI MẠNG CHUẨN MỚI (FREEHAND): Mã phòng LUÔN nằm cuối
-                string colorHex = (currentTool == DrawTool.Eraser) ? "#FFFFFF" : ColorTranslator.ToHtml(currentBrushColor);
-                float currentSize = (currentTool == DrawTool.Eraser) ? (brushSize * 4) : brushSize;
-                NetworkClient.SendMessage($"DRAW;FREEHAND;{lastPoint.X};{lastPoint.Y};{e.X};{e.Y};{colorHex};{currentSize};{currentRoomId}");
+                // --- GIẢI PHÁP THROTTLING MẠNG (Chống lag và dính gói tin) ---
+                // Tính khoảng cách Euclid bình phương giữa điểm vừa vẽ và điểm đã gửi gần nhất
+                int dx = e.X - lastSentPoint.X;
+                int dy = e.Y - lastSentPoint.Y;
+                if ((dx * dx + dy * dy) >= 16) // Khoảng cách thực tế lớn hơn hoặc bằng 4 pixel mới truyền gói tin đi
+                {
+                    string colorHex = (currentTool == DrawTool.Eraser) ? "#FFFFFF" : ColorTranslator.ToHtml(currentBrushColor);
+                    // Bổ sung ký tự ngắt dòng \n vào cuối gói tin theo đúng mô tả kỹ thuật
+                    NetworkClient.SendMessage($"DRAW;FREEHAND;{lastSentPoint.X};{lastSentPoint.Y};{e.X};{e.Y};{colorHex};{currentSize};{currentRoomId}\n");
+                    lastSentPoint = e.Location; // Cập nhật lại mốc điểm gửi mạng gần nhất
+                }
+
+                // Tối ưu hóa UI: Chỉ làm mới khu vực nét vẽ vừa di chuyển qua
+                int minX = Math.Min(lastPoint.X, e.X) - (int)currentSize - 2;
+                int minY = Math.Min(lastPoint.Y, e.Y) - (int)currentSize - 2;
+                int width = Math.Abs(lastPoint.X - e.X) + (int)currentSize * 2 + 4;
+                int height = Math.Abs(lastPoint.Y - e.Y) + (int)currentSize * 2 + 4;
 
                 lastPoint = e.Location;
-                pnlCanvas.Invalidate();
+                pnlCanvas.Invalidate(new Rectangle(minX, minY, width, height));
                 return;
             }
+
             if (isDrawingShape && (currentTool == DrawTool.Line || currentTool == DrawTool.Rectangle || currentTool == DrawTool.Circle))
             {
-                shapeEndPoint = e.Location;
+                // Đối với nét đứt xem trước (Preview Shape): Bắt buộc xóa vùng cũ vẽ vùng mới để tránh rác màn hình
                 pnlCanvas.Invalidate();
+                shapeEndPoint = e.Location;
             }
         }
 
@@ -382,7 +428,16 @@ namespace WhiteboardClient
         {
             if (e.Button == MouseButtons.Left)
             {
+                if (isDrawing && (currentTool == DrawTool.Pen || currentTool == DrawTool.Eraser))
+                {
+                    // Đảm bảo điểm cuối cùng của nét vẽ tự do luôn được đồng bộ khi nhấc chuột lên
+                    string colorHex = (currentTool == DrawTool.Eraser) ? "#FFFFFF" : ColorTranslator.ToHtml(currentBrushColor);
+                    float currentSize = (currentTool == DrawTool.Eraser) ? (brushSize * 4) : brushSize;
+                    NetworkClient.SendMessage($"DRAW;FREEHAND;{lastSentPoint.X};{lastSentPoint.Y};{e.X};{e.Y};{colorHex};{currentSize};{currentRoomId}\n");
+                }
+
                 isDrawing = false;
+
                 if (isDrawingShape && (currentTool == DrawTool.Line || currentTool == DrawTool.Rectangle || currentTool == DrawTool.Circle))
                 {
                     isDrawingShape = false;
@@ -395,10 +450,10 @@ namespace WhiteboardClient
                         }
                     }
 
-                    // GỬI MẠNG CHUẨN MỚI (SHAPE): Mã phòng LUÔN nằm cuối
                     string colorHex = ColorTranslator.ToHtml(currentBrushColor);
                     string toolName = currentTool.ToString().ToUpper();
-                    NetworkClient.SendMessage($"DRAW;SHAPE;{toolName};{shapeStartPoint.X};{shapeStartPoint.Y};{shapeEndPoint.X};{shapeEndPoint.Y};{colorHex};{brushSize};{currentRoomId}");
+                    // Thêm \n vào cuối gói tin gửi đi
+                    NetworkClient.SendMessage($"DRAW;SHAPE;{toolName};{shapeStartPoint.X};{shapeStartPoint.Y};{shapeEndPoint.X};{shapeEndPoint.Y};{colorHex};{brushSize};{currentRoomId}\n");
 
                     pnlCanvas.Invalidate();
                 }
@@ -439,7 +494,7 @@ namespace WhiteboardClient
         {
             if (bitmapGraphics != null) { bitmapGraphics.Clear(Color.White); }
             pnlCanvas.Invalidate();
-            NetworkClient.SendMessage($"CLEAR_CANVAS;{currentRoomId}");
+            NetworkClient.SendMessage($"CLEAR_CANVAS;{currentRoomId}\n");
         }
 
         private void BtnSaveImage_Click(object sender, EventArgs e)

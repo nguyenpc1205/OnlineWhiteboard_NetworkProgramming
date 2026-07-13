@@ -37,9 +37,6 @@ namespace WhiteboardServer
             // Tu dong kiem tra va tao bang du lieu ban dau
             TaoDatabaseForm();
 
-            // Khởi tạo Database nếu bạn có class DatabaseManager riêng
-            // DatabaseManager.InitializeDatabase(); 
-
             // --- KHU VỰC CHẠY THỬ NGHIỆM ĐỘC LẬP TẠI NHÀ ---
             Console.WriteLine("\n--- TIEN HANH KIEM TRA DATA ---");
             DocLichSuPhong("ROOM_101");
@@ -68,7 +65,7 @@ namespace WhiteboardServer
                     {
                         clientList.Add(client);
                     }
-                    // Kích hoạt đa luồng xử lý riêng biệt cho Client (Giữ nguyên kiến trúc đa luồng của bạn)
+                    // Kích hoạt đa luồng xử lý riêng biệt cho Client
                     Thread clientThread = new Thread(() => HandleClient(client));
                     clientThread.Start();
                 }
@@ -103,7 +100,7 @@ namespace WhiteboardServer
             // Ghép tên thành chuỗi: User1,User2,User3
             string userListString = string.Join(",", usersInRoom);
 
-            // ⚡ ĐÃ SỬA LỖI: Cấu trúc gọi về Client chỉ còn USER_LIST;DanhSachTen
+            // Cấu trúc gọi về Client chỉ còn USER_LIST;DanhSachTen
             string packetData = $"USER_LIST;{userListString}";
 
             // Bắn danh sách này cho toàn bộ phòng (Dùng lại hàm BroadcastData nhưng truyền sender = null để gửi cho TẤT CẢ)
@@ -180,6 +177,27 @@ namespace WhiteboardServer
                         else if (command == "CLEAR_CANVAS" || command == "USER_LIST")
                         {
                             currentRoomID = protocolParts[1];
+
+                            // [ĐÃ SỬA LỖI]: Nếu nhận được lệnh CLEAR_CANVAS, xóa sạch lịch sử vẽ của phòng đó trong SQLite
+                            if (command == "CLEAR_CANVAS")
+                            {
+                                try
+                                {
+                                    using var conn = new SqliteConnection(_dbPath);
+                                    conn.Open();
+
+                                    var sqlDelete = "DELETE FROM DrawHistory WHERE RoomID = @room";
+                                    using var cmd = new SqliteCommand(sqlDelete, conn);
+                                    cmd.Parameters.AddWithValue("@room", currentRoomID);
+
+                                    int rowsAffected = cmd.ExecuteNonQuery();
+                                    Console.WriteLine($"[SQLite] Đã XÓA SẠCH {rowsAffected} nét vẽ lịch sử của phòng [{currentRoomID}] do có lệnh CLEAR_CANVAS.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"[SQLite Error] Không thể xóa lịch sử phòng {currentRoomID}: {ex.Message}");
+                                }
+                            }
                         }
                         // TRÍCH XUẤT ROOM ID TỪ GÓI VẼ "DRAW"
                         else if (command == "DRAW")
@@ -198,7 +216,7 @@ namespace WhiteboardServer
                         LuuNetVe(currentRoomID, username, packetData);
                     }
 
-                    // Hành động 2: Phát sóng chuyển tiếp nét vẽ nguyên bản cho các máy khác CÙNG PHÒNG
+                    // Hành động 2: Phát sóng chuyển tiếp gói tin nguyên bản cho các máy khác CÙNG PHÒNG
                     BroadcastData(currentRoomID, packetData, client);
                 }
             }
@@ -210,14 +228,12 @@ namespace WhiteboardServer
             {
                 lock (clientList) { clientList.Remove(client); }
                 lock (clientRooms) { clientRooms.Remove(client); }
-
-                // ⚡ ĐÃ SỬA LỖI: Xóa tên người đó khỏi danh sách để UI không bị lưu lại
                 lock (clientNames) { clientNames.Remove(client); }
 
                 client.Close();
                 Console.WriteLine($"[NGẮT KẾT NỐI] Một Client đã thoát. Trong phòng còn lại: {clientList.Count} người.");
 
-                // ⚡ ĐÃ SỬA LỖI: Gửi tín hiệu điểm danh lại cho phòng
+                // Gửi tín hiệu điểm danh lại cho phòng
                 if (!string.IsNullOrEmpty(currentRoomID))
                 {
                     BroadcastUserList(currentRoomID);
@@ -276,7 +292,7 @@ namespace WhiteboardServer
             Console.WriteLine("[SQLite] Check va khoi tao bang DrawHistory xong.");
         }
 
-        // Hàm 2:bản ghi nét vẽ khi nhận được tín hiệu qua mạng
+        // Hàm 2: Bản ghi nét vẽ khi nhận được tín hiệu qua mạng
         public static void LuuNetVe(string roomID, string nguoiVe, string chuoiToaDo)
         {
             using var conn = new SqliteConnection(_dbPath);
@@ -285,7 +301,6 @@ namespace WhiteboardServer
             var sqlInsert = "INSERT INTO DrawHistory (RoomID, Username, PacketData) VALUES (@room, @user, @packet)";
 
             using var cmd = new SqliteCommand(sqlInsert, conn);
-            // Gán tham số trực tiếp để tối ưu hóa truy vấn
             cmd.Parameters.AddWithValue("@room", roomID);
             cmd.Parameters.AddWithValue("@user", nguoiVe);
             cmd.Parameters.AddWithValue("@packet", chuoiToaDo);
